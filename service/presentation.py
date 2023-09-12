@@ -138,7 +138,6 @@ class PresentationBuilder:
         return slide
 
     def title_of_shmuts(self, slide):
-        # I assume job_and_name is an instance variable
         slide = self.create_textbox(
             slide, Cm(1.95), Cm(0.8), Cm(25.62), Cm(2.77),
             self.job_and_name,
