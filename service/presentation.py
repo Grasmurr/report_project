@@ -35,7 +35,7 @@ class PresentationBuilder:
         background = slide.background
         fill = background.fill
         fill.solid()
-        fill.fore_color = color
+        fill.fore_color.rgb = color
         return slide
 
     def black_background(self, slide):
