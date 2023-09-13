@@ -45,7 +45,7 @@ class PresentationBuilder:
         return self.set_background_color(slide, RGBColor(217, 217, 217))
 
     def add_cc_logo(self, slide):
-        logo_path = 'consumer_culture_logos_rgb-01-2.png'
+        logo_path = 'assets/consumer_culture_logos_rgb-01-2.png'
         slide.shapes.add_picture(
             logo_path,
             Cm(-0.77),
