@@ -32,6 +32,9 @@ def main():
 
                 builder.create_photoslide(left_photo, date_left, place.lower(), right_photo, date_right)
 
+    builder.prs.save('CC__title_sample.pptx')
+    print("I am happy")
+
 
 # cdef main():
 # pass
