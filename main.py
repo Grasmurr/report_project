@@ -2,6 +2,7 @@ import collections, os
 from service.presentation import PresentationBuilder
 from lxml import etree
 
+
 def main():
     builder = PresentationBuilder()
 

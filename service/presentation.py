@@ -4,6 +4,10 @@ from pptx.dml.color import RGBColor
 from PIL import Image
 
 
+lst = [1, 2, 3]
+lst.append()
+
+
 class PresentationBuilder:
     def __init__(self):
         self.prs = Presentation()
@@ -180,7 +184,5 @@ class PresentationBuilder:
 
         self.add_cc_logo(slide)
         return slide
-
-
 
 
