@@ -3,11 +3,6 @@ from pptx.util import Cm, Pt
 from pptx.dml.color import RGBColor
 from PIL import Image
 
-
-lst = [1, 2, 3]
-lst.append()
-
-
 class PresentationBuilder:
     def __init__(self):
         self.prs = Presentation()
@@ -149,24 +144,24 @@ class PresentationBuilder:
         )
         return slide
 
-    def add_photos_to_presentation(self, prs, photos, place):
-        title_photoslides_text = self.title_mapping.get(place, "Заголовок по умолчанию")
-
-        for i in range(0, len(photos), 2):
-            slide = self.create_slide()
-            self.create_shmuts_left(slide)
-            self.create_shmuts_right(slide)
-            self.create_title_photoslides(slide, title_photoslides_text)
-            self.add_image(slide, photos[i], left=True)
-            self.create_time_for_photo(slide, self.date_for_photo_left, left=True)
-
-            if i + 1 < len(photos):
-                self.add_image(slide, photos[i + 1], left=False)
-                self.create_time_for_photo(slide, self.date_for_photo_right, left=False)
-
-            self.add_cc_logo(slide)
-
-        return prs
+    # def add_photos_to_presentation(self, prs, photos, place):
+    #     title_photoslides_text = self.title_mapping.get(place, "Заголовок по умолчанию")
+    #
+    #     for i in range(0, len(photos), 2):
+    #         slide = self.create_slide()
+    #         self.create_shmuts_left(slide)
+    #         self.create_shmuts_right(slide)
+    #         self.create_title_photoslides(slide, title_photoslides_text)
+    #         self.add_image(slide, photos[i], left=True)
+    #         self.create_time_for_photo(slide, self.date_for_photo_left, left=True)
+    #
+    #         if i + 1 < len(photos):
+    #             self.add_image(slide, photos[i + 1], left=False)
+    #             self.create_time_for_photo(slide, self.date_for_photo_right, left=False)
+    #
+    #         self.add_cc_logo(slide)
+    #
+    #     return prs
 
     def create_photoslide(self, image_path_left, date_left, place, image_path_right=None, date_right=None):
 

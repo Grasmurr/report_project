@@ -32,12 +32,21 @@ def info_message(message: Message):
     bot.send_message(chat_id=chat_id, text='Информация о боте!', reply_markup=markup)
 
 
+@bot.message_handler(content_types=['text'])
+def error(message: Message):
+    chat_id = get_id(message)
+    bot.send_message(chat_id=chat_id, text='Вы ввели неправильный пин код!')
+
+
 @bot.callback_query_handler(func=lambda call: call.data == '1')
 def info_subbotton(call: CallbackQuery):
     chat_id = call.from_user.id
 
     bot.send_message(chat_id, 'ПРИПРИВЕТ!!!')
     bot.edit_message_text()
+
+
+
 
 
 bot.infinity_polling()
