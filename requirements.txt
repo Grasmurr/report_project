@@ -2,3 +2,4 @@ python-pptx
 pillow
 pydrive
 pytelegrambotapi
+lxml==4.9.1
