@@ -10,6 +10,7 @@ def generate_random_time(date_str):
             date_obj = datetime.datetime.strptime(date_str, "%d_%m_%Y")
         elif '-' in date_str:
             date_obj = datetime.datetime.strptime(date_str, "%d-%m-%Y")
+
     except:
         return False
 

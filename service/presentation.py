@@ -160,8 +160,6 @@ class PresentationBuilder:
         )
         return slide
 
-
-
     def create_photoslide(self, image_path_left, date_left, place, image_path_right=None, date_right=None):
 
         title_photoslides_text = self.title_mapping.get(place, "Заголовок по умолчанию")
