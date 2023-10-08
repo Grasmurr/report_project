@@ -1,5 +1,9 @@
 import collections, os, datetime, random
 from service.presentation import PresentationBuilder
+from service.telegram_bot.main import start_bot
+import asyncio
+import logging
+import sys
 
 
 def generate_random_time(date_str):
@@ -72,5 +76,8 @@ def main():
 def func():
     pass
 
+
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(start_bot())
     main()
