@@ -22,6 +22,7 @@ class MainMenuStates(StatesGroup):
 
 class AdminStates(StatesGroup):
     main = State()
+    manage_events = State()
 
 
 @dp.message(CommandStart())
