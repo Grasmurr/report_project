@@ -34,6 +34,7 @@ async def admin_menu(message: Message, state: FSMContext):
     await message.answer('Добро пожаловать в админ-панель', reply_markup=markup)
 
 
+
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
 async def manage_events(message: Message):
     markup = chat_backends.create_keyboard_buttons('Создать мероприятие', 'Удалить мероприятие', 'Назад')
