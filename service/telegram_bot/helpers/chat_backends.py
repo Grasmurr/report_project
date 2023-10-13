@@ -11,4 +11,5 @@ def create_keyboard_buttons(*args):
     for i in args:
         builder.button(text=i)
     builder.adjust(2, 2)
-    return builder.as_markup()
+    return builder.as_markup(resize_keyboard=True)
+

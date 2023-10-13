@@ -93,7 +93,7 @@ async def question_continue_create_event(message: Message, state: FSMContext):
 
 
 @dp.message(AdminStates.enter_count_of_event_prime)
-async def create_count_of_prime_tickets (message: Message, state: FSMContext):
+async def create_count_of_prime_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_prime_tickets = int(message.text)
         data = await state.get_data()
