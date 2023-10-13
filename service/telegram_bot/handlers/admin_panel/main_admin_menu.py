@@ -18,15 +18,11 @@ from aiogram.types.input_file import BufferedInputFile
 from service.telegram_bot.states import AdminStates
 
 
-
-
-
-
-
-
-
-# @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
-# async def back_from_upload_data_in_format_final (message: Message, state: FSMContext):
-#     await choose_format_for_uploading_data(message, state)
-# if message == 'Вернуться в меню администратора':
-#         await admin_menu(message, state)
+@dp.message(F.text == '/admin')
+async def admin_menu(message: Message, state: FSMContext):
+    markup = chat_backends.create_keyboard_buttons("Управление мероприятиями",
+                                                   "Оформить возврат",
+                                                   "Cделать выгрузку данных",
+                                                   "Назад")
+    await state.set_state(AdminStates.main)
+    await message.answer('Добро пожаловать в админ-панель', reply_markup=markup)
