@@ -32,6 +32,9 @@ class AdminStates(StatesGroup):
     enter_count_of_event_prime = State()
     enter_count_of_event_normal = State()
     saving_or_editing_from_the_beginning = State()
+    ticket_refund = State()
+    upload_data = State()
+    upload_data_in_format = State()
 
 
 @dp.message(F.text == '/admin')
@@ -51,6 +54,7 @@ async def manage_events(message: Message, state: FSMContext):
     await message.answer(text='Что вы хотите сделать?',
                          reply_markup=markup)
 
+# Для выгрузки в файл creating_event
 
 @dp.message(AdminStates.manage_events, F.text == 'Создать мероприятие')
 async def create_event(message: Message, state: FSMContext):
@@ -138,6 +142,44 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
         await state.set_state(AdminStates.main)
     else:
         await create_event(message, state)
+
+
+@dp.message(AdminStates.main, F.text == 'Оформить возврат')
+async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
+    markup = chat_backends.create_keyboard_buttons('Все счастливы', 'Все несчастны', 'Назад')
+    await state.set_state(AdminStates.ticket_refund)
+    await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
+                         reply_markup=markup)
+
+@dp.message(AdminStates.ticket_refund, F.text == 'Назад')
+async def back(message: Message, state: FSMContext):
+    await admin_menu(message, state)
+
+@dp.message(AdminStates.main, F.text == 'Сделать выгрузку данных')
+async def choose_event_for_uploading_data (message: Message, state: FSMContext):
+    markup = chat_backends.create_keyboard_buttons('Все счастливы', 'Все несчастны', 'Назад')
+    await state.set_state(AdminStates.upload_data)
+    await message.answer(text='Выберите мероприятие, данные которого вы хотите выгрузить',
+                         reply_markup=markup)
+@dp.message(AdminStates.upload_data)
+async def choose_format_for_uploading_data (message: Message, state: FSMContext):
+    if message == 'Все счастливы' or 'Все несчастны':
+        markup = chat_backends.create_keyboard_buttons('.xlsx', '.csv', 'Назад')
+        await state.set_state(AdminStates.upload_data_in_format)
+        await message.answer(text='Выберите формат, в котором хотите выгрузить данные:',
+                             reply_markup=markup)
+    elif message == 'Назад':
+        await choose_event_for_uploading_data (message, state)
+
+
+# @dp.message(AdminStates.main)
+# async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
+#    if message == '.xlsx' or '.csv':
+#        await message.answer(text=f'Вот ваш файл “файл” в формате {message}',
+#                          reply_markup=ReplyKeyboardRemove())
+#    elif message.text == 'Назад':
+#            await manage_events(message, state)
+
 
 
 
