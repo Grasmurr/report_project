@@ -18,6 +18,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import BufferedInputFile
 # from aiogram.dispatcher import FSMContext
 
+
 class MainMenuStates(StatesGroup):
     report_choose = State()
 
@@ -29,8 +30,7 @@ class AdminStates(StatesGroup):
     confirm_event_name = State()
     enter_count_of_event_prime = State()
     enter_count_of_event_normal = State()
-    saving_or_editing_from_the_beginning = State ()
-    saving_or_editing_from_the_beginning_2 = State()
+    saving_or_editing_from_the_beginning = State()
 
 
 @dp.message(F.text == '/admin')
@@ -43,80 +43,85 @@ async def admin_menu(message: Message, state: FSMContext):
     await message.answer('Добро пожаловать в админ-панель', reply_markup=markup)
 
 
-
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
 async def manage_events(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Создать мероприятие', 'Удалить мероприятие', 'Назад')
     await message.answer(text='Что вы хотите сделать?',
                          reply_markup=markup)
 
-name_of_event = ''
 
 @dp.message(AdminStates.main, F.text == 'Создать мероприятие')
 async def create_event(message: Message, state: FSMContext):
     await message.answer(text='Введите название мероприятия',
-                     reply_markup=ReplyKeyboardRemove())
+                         reply_markup=ReplyKeyboardRemove())
     await state.set_state(AdminStates.enter_event_name)
 
+
 @dp.message(AdminStates.enter_event_name)
-async def question_continue_create_event (message: Message, state: FSMContext):
-    global name_of_event
+async def enter_event_name(message: Message, state: FSMContext):
     name_of_event = message.text
     markup = chat_backends.create_keyboard_buttons('Да', 'Назад')
     await message.answer(f'Вы хотите создать мероприятие «{name_of_event}». Продолжить?',
                          reply_markup=markup)
+    await state.update_data(name_of_event=name_of_event)
     await state.set_state(AdminStates.confirm_event_name)
+
 
 @dp.message(AdminStates.confirm_event_name)
 async def question_continue_create_event(message: Message, state: FSMContext):
     if message.text == 'Назад':
-        await state.finish()
         await admin_menu(message=message)
     else:
-        await message.answer(text='Хорошо. Теперь введите число прайм билетов, которое вы хотите создать для этого мероприятия:',
+        await message.answer(text='Хорошо. Теперь введите число прайм билетов, которое вы хотите '
+                                  'создать для этого мероприятия:',
                              reply_markup=ReplyKeyboardRemove())
         await state.set_state(AdminStates.enter_count_of_event_prime)
 
-count_of_prime_tickets = ''
+
 @dp.message(AdminStates.enter_count_of_event_prime)
 async def create_count_of_prime_tickets (message: Message, state: FSMContext):
-    global count_of_prime_tickets
     if message.text.isdigit():
         count_of_prime_tickets = int(message.text)
-        await message.answer (f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия «{name_of_event}».\n \n'
+        data = await state.get_data()
+        await message.answer (f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия «{data["name_of_event"]}».\n \n'
                               'Теперь введите число обычных билетов, которое вы хотите создать для этого мероприятия:')
+        await state.update_data(count_of_prime_tickets=count_of_prime_tickets)
         await state.set_state(AdminStates.enter_count_of_event_normal)
     else:
         await message.answer('Кажется, вы ввели что-то неправильно, попробуйте снова...')
 
-count_of_normal_tickets = ''
+
 @dp.message(AdminStates.enter_count_of_event_normal)
 async def create_count_of_normal_tickets (message: Message, state: FSMContext):
-    global count_of_normal_tickets
     if message.text.isdigit():
         count_of_normal_tickets = int(message.text)
-        markup = chat_backends.create_keyboard_buttons('Продолжить')
+        markup = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
+        data = await state.get_data()
+        count_of_prime_tickets = data['count_of_prime_tickets']
+        name_of_event = data['name_of_event']
         await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов, '
-                             f'а также {count_of_normal_tickets} обычных билетов для мероприятия «{name_of_event}».', reply_markup=markup)
+                             f'а также {count_of_normal_tickets} обычных билетов для мероприятия «{name_of_event}». '
+                             f'\n\nЕсли вы передумали, вы можете ввести данные заново',
+                             reply_markup=markup)
+        await state.update_data(count_of_normal_tickets=count_of_normal_tickets)
         await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+
 
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
 async def success_notification_and_recreate (message: Message, state: FSMContext):
-    markup = chat_backends.create_keyboard_buttons("Вернуться в меню" ,'Ввести данные заново')
-    await message.answer('Мероприятие было успешно создано! Но если вы передумали, вы можете ввести данные заново', reply_markup=markup)
-    await state.set_state(AdminStates.saving_or_editing_from_the_beginning_2)
-
-@dp.message(AdminStates.saving_or_editing_from_the_beginning_2)
-async def bifurcation_saving_or_editing_from_the_beginning (message: Message, state: FSMContext):
-    if message == "Вернуться в меню":
-        await admin_menu
-        await state.finish()
-#       здесь должна быть строчка про сохранение данных
-
-
-
-
-
+    if message.text == 'Продолжить':
+        markup = chat_backends.create_keyboard_buttons("Управление мероприятиями",
+                                                       "Оформить возврат",
+                                                       "Cделать выгрузку данных",
+                                                       "Назад")
+        await message.answer('Мероприятие было успешно создано!', reply_markup=markup)
+        data = await state.get_data()
+        for i in data:
+            print(f'{i}: {data[i]}')
+        # TODO: Эти данные у нас дальше будут ехать в базу, создавая там билеты
+        await state.set_state(AdminStates.main)
+    else:
+        await create_event(message, state)
 
 
 
