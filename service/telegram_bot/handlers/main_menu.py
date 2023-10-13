@@ -35,6 +35,7 @@ class AdminStates(StatesGroup):
     ticket_refund = State()
     upload_data = State()
     upload_data_in_format = State()
+    upload_data_in_format_final = State()
 
 
 @dp.message(F.text == '/admin')
@@ -151,34 +152,55 @@ async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
     await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
                          reply_markup=markup)
 
+# TODO: здесь должен быть код для возвратов
+
 @dp.message(AdminStates.ticket_refund, F.text == 'Назад')
 async def back(message: Message, state: FSMContext):
     await admin_menu(message, state)
 
-@dp.message(AdminStates.main, F.text == 'Сделать выгрузку данных')
+@dp.message(AdminStates.main, F.text == "Cделать выгрузку данных")
 async def choose_event_for_uploading_data (message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Все счастливы', 'Все несчастны', 'Назад')
     await state.set_state(AdminStates.upload_data)
     await message.answer(text='Выберите мероприятие, данные которого вы хотите выгрузить',
                          reply_markup=markup)
-@dp.message(AdminStates.upload_data)
+@dp.message(AdminStates.upload_data, F.text != 'Назад')
 async def choose_format_for_uploading_data (message: Message, state: FSMContext):
-    if message == 'Все счастливы' or 'Все несчастны':
-        markup = chat_backends.create_keyboard_buttons('.xlsx', '.csv', 'Назад')
-        await state.set_state(AdminStates.upload_data_in_format)
-        await message.answer(text='Выберите формат, в котором хотите выгрузить данные:',
-                             reply_markup=markup)
-    elif message == 'Назад':
-        await choose_event_for_uploading_data (message, state)
+    markup = chat_backends.create_keyboard_buttons('.xlsx', '.csv', 'Назад')
+    await state.set_state(AdminStates.upload_data_in_format)
+    await message.answer(text='Выберите формат, в котором хотите выгрузить данные:',
+                         reply_markup=markup)
+
+@dp.message(AdminStates.upload_data, F.text == 'Назад')
+async def back_from_uploading_data(message: Message, state: FSMContext):
+    await admin_menu(message, state)
+
+@dp.message(AdminStates.upload_data_in_format, F.text != 'Назад')
+async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
+   markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Вернуться в меню админа')
+   await state.set_state(AdminStates.upload_data_in_format_final)
+   await message.answer(text=f'Вот ваш файл в формате {message.text}',
+                         reply_markup=markup)
+
+@dp.message(AdminStates.upload_data_in_format, F.text == 'Назад')
+async def back_from_choosing_event_for_uploading_data (message: Message, state: FSMContext):
+    await choose_event_for_uploading_data(message, state)
+
+@dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
+async def upload_data_in_another_format (message: Message, state: FSMContext):
+    await choose_format_for_uploading_data(message, state)
+
+@dp.message(AdminStates.upload_data_in_format_final, F.text == 'Вернуться в меню админа')
+async def back_from_upload_data_in_format (message: Message, state: FSMContext):
+    await admin_menu(message, state)
 
 
-# @dp.message(AdminStates.main)
-# async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
-#    if message == '.xlsx' or '.csv':
-#        await message.answer(text=f'Вот ваш файл “файл” в формате {message}',
-#                          reply_markup=ReplyKeyboardRemove())
-#    elif message.text == 'Назад':
-#            await manage_events(message, state)
+# @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
+# async def back_from_upload_data_in_format_final (message: Message, state: FSMContext):
+#     await choose_format_for_uploading_data(message, state)
+# if message == 'Вернуться в меню администратора':
+#         await admin_menu(message, state)
+
 
 
 
