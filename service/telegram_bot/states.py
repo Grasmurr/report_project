@@ -19,8 +19,11 @@ class AdminStates(StatesGroup):
     upload_data_in_format = State()
     upload_data_in_format_final = State()
 
+
 class PromouterStates(StatesGroup):
     main = State()
+    begin_registration = State()
+    enter_initials = State()
     main_enter_data = State()
     main_enter_telephone = State()
     main_enter_course = State()
