@@ -17,20 +17,36 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import BufferedInputFile
 from service.telegram_bot.states import PromouterStates
 
-@dp.message(F.text == '/promouter')
+from service.telegram_bot.helpers.chat_backends import create_keyboard_buttons
+
+
+@dp.message(CommandStart())
 async def promouter_menu(message: Message, state: FSMContext):
-    await state.set_state(PromouterStates.main)
-    await message.answer(f'Добро пожаловать в промоутер-панель. \n \nДля идентификации, пожалуйста, введите свои имя и фамилию в формате:\nИмя Фамилия', reply_markup = ReplyKeyboardRemove())
+    await state.set_state(PromouterStates.begin_registration)
+    markup = create_keyboard_buttons('Зарегистрироваться')
+    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
+                         f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
+                         reply_markup=markup)
 
 
-@dp.message(PromouterStates.main)
+@dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
     # if message in data:
-    await state.set_state(PromouterStates.main_enter_telephone)
-    await message.answer(f'Добрый день {message.text}!\n\nТеперь, пожалуйста, введите номер телефона')
+    await message.answer(f'Хорошо! \n \nДля идентификации, пожалуйста,'
+                         f' введите свои имя и фамилию в формате:\nИмя Фамилия',
+                         reply_markup=ReplyKeyboardRemove())
+    await state.set_state(PromouterStates.enter_initials)
 
-@dp.message(PromouterStates.main_enter_telephone)
+
+@dp.message(PromouterStates.enter_initials)
 async def identify_promouter_number(message: Message, state: FSMContext):
+    if message.text.split() == 2:
+        # await message.answer('')
+
+        pass
+    else:
+        await message.answer('Пожалуйста, введите имя и фамилию в формате "Иван Иванов"')
+
     if message.isdigit:
         await state.set_state(PromouterStates.main_enter_course)
         markup = chat_backends.create_keyboard_buttons('Бизнес информатика','Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ',
