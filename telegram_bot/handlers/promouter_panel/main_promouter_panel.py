@@ -23,27 +23,36 @@ from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
     # if message in data:
-    await message.answer(f'Хорошо! \n \nДля идентификации, пожалуйста,'
-                         f' введите свои имя и фамилию в формате:\nИмя Фамилия',
+    await message.answer(f'Хорошо! Для идентификации, пожалуйста,'
+                         f' введите свои имя и фамилию в формате:\n \n"Имя Фамилия"',
                          reply_markup=ReplyKeyboardRemove())
     await state.set_state(PromouterStates.enter_initials)
 
 
 @dp.message(PromouterStates.enter_initials)
 async def identify_promouter_number(message: Message, state: FSMContext):
-    if message.text.split() == 2:
-        # await message.answer('')
-
-        pass
+    print(message.text)
+    if len(message.text.split()) == 2:
+        await state.set_state(PromouterStates.waitng_for_admin_accept)
+        await message.answer(f'Спасибо! Введите, пожалуйста, свой номер телефона в формате "89991234567"',
+                             reply_markup=ReplyKeyboardRemove())
     else:
         await message.answer('Пожалуйста, введите имя и фамилию в формате "Иван Иванов"')
 
-    if message.isdigit:
-        await state.set_state(PromouterStates.main_enter_course)
-        markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ',
-                                                                 'РиСО', 'Социология', 'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП", 'Не ВШЭ')
+@dp.message(PromouterStates.waitng_for_admin_accept)
+async def waiting_for_admin_accept(message: Message, state: FSMContext):
+    if message.text.isdigit and len(message.text.split()) == 1:
+        await state.set_state(PromouterStates.accepted_promouter_panel)
+        await message.answer(f'Спасибо! Скоро админ проверит вашу заявку', reply_markup=ReplyKeyboardRemove())
+    else:
+        await message.answer(f'Пожалуйста, введите свой номер телефона в формате "89991234567"')
 
-        await message.answer(f'Спасибо! Скажите, на какой образовательной программе вы учитесь?', reply_markup=markup)
 
+@dp.message(PromouterStates.accepted_promouter_panel)
+async def accepted_promouter_panel(message: Message, state: FSMContext):
+    await state.set_state(PromouterStates.main_accepted_promouter_panel)
+    markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
+                                                   "Оформить возврат")
+    await message.answer(f'Добро пожаловать в панель промоутера', reply_markup=markup)
 
 
