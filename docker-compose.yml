@@ -5,13 +5,20 @@ services:
     build:
       context: ./telegram_bot
     depends_on:
-      - repository
-    environment:
-      - DATABASE_URL=postgresql://admin:prod@repository:5432/postgres
+      - django_app
 
-  repository:
+  django_app:
     build:
-      context: ./repository
+      context: ./myapi
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://admin:prod@db:5432/postgres
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:latest
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=admin
