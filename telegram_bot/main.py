@@ -1,7 +1,6 @@
 import logging, sys, asyncio
 import aiogram
 from handlers import dp, bot
-from loader import dp, bot
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 
