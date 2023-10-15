@@ -1,4 +1,4 @@
-from telegram_bot.loader import dp
+from telegram_bot.loader import dp, bot
 from aiogram.types import \
     (Message,
      ReplyKeyboardRemove
