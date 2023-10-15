@@ -106,6 +106,8 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
         for i in data:
             print(f'{i}: {data[i]}')
         # TODO: Эти данные у нас дальше будут ехать в базу, создавая там билеты
+        print(data)
+
 
         await state.set_state(AdminStates.main)
     else:
