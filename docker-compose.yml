@@ -6,6 +6,8 @@ services:
       context: ./telegram_bot
     depends_on:
       - django_app
+    networks:
+      - mynetwork
 
   django_app:
     build:
@@ -16,6 +18,8 @@ services:
       - DATABASE_URL=postgresql://admin:prod@db:5432/postgres
     ports:
       - "8000:8000"
+    networks:
+      - mynetwork
 
   db:
     image: postgres:13
@@ -25,6 +29,12 @@ services:
       - POSTGRES_PASSWORD=prod
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
 
 volumes:
   pg_data:
+
+networks:
+  mynetwork:
+    driver: bridge
