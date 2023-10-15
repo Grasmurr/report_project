@@ -75,5 +75,5 @@ async def refund_ends(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)
-    await state.set_state(PromouterStates.accepted_promouter_panel)
+    await state.set_state(PromouterStates.main_accepted_promouter_panel)
 

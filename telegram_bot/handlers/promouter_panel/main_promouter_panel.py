@@ -51,7 +51,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 
         builder = InlineKeyboardBuilder()
         builder.button(text='Подтвердить', callback_data=f'allow{message.from_user.id}')
-        builder.button(text='Отказать', callback_data='decline')
+        builder.button(text='Отказать', callback_data=f'decline{message.from_user.id}')
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=572319915,
@@ -78,7 +78,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     else:
         await state.set_state(PromouterStates.begin_registration)
         markup = create_keyboard_buttons('Зарегистрироваться')
-        await bot.send_message(chat_id=ans[5:],
+        await bot.send_message(chat_id=ans[7:],
                                text=f'Добро пожаловать в телеграм бот агентства Гамма! '
                              f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
                                reply_markup=markup)

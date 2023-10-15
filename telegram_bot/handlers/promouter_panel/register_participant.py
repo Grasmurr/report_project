@@ -99,7 +99,7 @@ async def registration_ends(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
-    await state.set_state(PromouterStates.accepted_promouter_panel)
+    await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
