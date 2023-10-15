@@ -1,7 +1,7 @@
 import logging, sys, asyncio
 import aiogram
-from telegram_bot.handlers import dp, bot
-from telegram_bot.loader import dp, bot
+from handlers import dp, bot
+from loader import dp, bot
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 
