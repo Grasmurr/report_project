@@ -40,13 +40,13 @@ async def back_from_choose_ticket_type_for_refund(message: Message, state: FSMCo
     await choose_event_for_refund(message, state)
 
 
-@dp.message(PromouterStates.choose_event_for_participants_refund)
+@dp.message(PromouterStates.choose_ticket_type_for_refund)
 async def enter_number_of_ticket_for_refund(message: Message, state: FSMContext):
     ticket_type_for_refund = message.text
     data = await state.get_data()
     await state.update_data(ticket_type_for_refund=ticket_type_for_refund)
     await state.set_state(PromouterStates.enter_number_of_ticket_for_refund)
-    await message.answer(text='Введите номер билета')
+    await message.answer(text='Введите номер билета', reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message(PromouterStates.enter_number_of_ticket_for_refund)
@@ -59,7 +59,7 @@ async def confirm_ticket_data_for_refund(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Подтвердить возврат', 'Назад')
     await state.set_state(PromouterStates.confirm_ticket_data_for_refund)
     await message.answer(
-        text=f'Вы собираетесь оформить возврат билета №{ticket_number_for_refund} типа "{ticket_type_for_refund}"'
+        text=f'Вы собираетесь оформить возврат билета №{ticket_number_for_refund} типа "{ticket_type_for_refund}" '
              f'на мероприятие "{event_for_refund}". '
              f'Подтвердить?',
         reply_markup=markup)
@@ -71,7 +71,7 @@ async def back_from_confirm_ticket_data_for_refund(message: Message, state: FSMC
 
 
 @dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
-async def registration_ends(message: Message, state: FSMContext):
+async def refund_ends(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)

@@ -21,6 +21,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 
+
+
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
     # if message in data:
@@ -52,7 +54,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         builder.button(text='Отказать', callback_data='decline')
         markup = builder.as_markup()
 
-        await bot.send_message(chat_id=305378717,
+        await bot.send_message(chat_id=572319915,
                                  text='Подтвердить регистрацию промоутера?',
                                  reply_markup=markup)
 
