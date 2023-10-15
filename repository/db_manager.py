@@ -27,20 +27,20 @@ class DBManager:
 
     async def insert_event(self, name, nm_prime, nm_usual):
         await self.conn.execute(
-            'INSERT INTO events (name, nm_prime, nm_usual) VALUES ($1, $2, $3)',
+            'INSERT INTO events (name, nm_prime, nm_usual) VALUES (?,?,?)',
             name, nm_prime, nm_usual
         )
 
     async def get_event(self, name):
-        return await self.conn.fetchrow('SELECT * FROM events WHERE name = $1', name)
+        return await self.conn.fetchrow('SELECT * FROM events WHERE name = ?', name)
 
     async def insert_ticket(self, event_name, ticket_number, name, surname, ticket_type):
         await self.conn.execute(
-            'INSERT INTO tickets (event_name, ticket_number, name, surname, ticket_type) VALUES ($1, $2, $3, $4, $5)',
+            'INSERT INTO tickets (event_name, ticket_number, name, surname, ticket_type) VALUES (?,?,?,?,?)',
             event_name, ticket_number, name, surname, ticket_type
         )
 
     async def get_ticket(self, ticket_number):
-        return await self.conn.fetchrow('SELECT * FROM tickets WHERE ticket_number = $1', ticket_number)
+        return await self.conn.fetchrow('SELECT * FROM tickets WHERE ticket_number = ?', ticket_number)
 
 
