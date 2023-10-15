@@ -20,8 +20,6 @@ async def manage_events(message: Message, state: FSMContext):
     await message.answer(text='Что вы хотите сделать?',
                          reply_markup=markup)
 
-# Для выгрузки в файл creating_event
-
 
 @dp.message(AdminStates.manage_events, F.text == 'Создать мероприятие')
 async def create_event(message: Message, state: FSMContext):
@@ -62,7 +60,7 @@ async def question_continue_create_event(message: Message, state: FSMContext):
                              reply_markup=ReplyKeyboardRemove())
         await state.set_state(AdminStates.enter_count_of_event_prime)
 
-# SOLID
+
 @dp.message(AdminStates.enter_count_of_event_prime)
 async def create_count_of_prime_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():

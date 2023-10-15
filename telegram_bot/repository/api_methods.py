@@ -1,6 +1,12 @@
 import aiohttp
 import json
 
+############################################################################################################
+##                                                                                                        ##
+##                                          POST METHODS                                                  ##
+##                                                                                                        ##
+############################################################################################################
+
 
 async def send_to_api(endpoint, data):
     url = f'http://django_app:8000/api/{endpoint}'
@@ -55,6 +61,11 @@ username = 'example_user'
 full_name = 'Example User'
 await create_promouter(user_id, username, full_name)
 '''
+############################################################################################################
+##                                                                                                        ##
+##                                          GET METHODS                                                   ##
+##                                                                                                        ##
+############################################################################################################
 
 
 async def get_from_api(endpoint, params=None):
@@ -69,26 +80,43 @@ async def get_from_api(endpoint, params=None):
                 return None
 
 
+async def get_all_promouters():
+    endpoint = 'promouters/'
+    return await get_from_api(endpoint)
+
+
 async def get_promouter(user_id):
-    endpoint = 'promouter/'
-    params = {'user_id': user_id}
-    return await get_from_api(endpoint, params)
+    endpoint = f'promouter/{user_id}/'
+    return await get_from_api(endpoint)
 
 
-async def get_event(name):
-    endpoint = 'event/'
-    params = {'name': name}
-    return await get_from_api(endpoint, params)
+async def get_all_events():
+    endpoint = 'events/'
+    return await get_from_api(endpoint)
 
 
-async def get_ticket(ticket_number):
-    endpoint = 'ticket/'
-    params = {'ticket_number': ticket_number}
-    return await get_from_api(endpoint, params)
+async def get_all_tickets():
+    endpoint = 'tickets/'
+    return await get_from_api(endpoint)
+
+
+async def get_tickets_by_type(ticket_type):
+    endpoint = f'tickets/{ticket_type}/'
+    return await get_from_api(endpoint)
+
+
+async def get_event_by_name(name):
+    endpoint = f'event/{name}/'
+    return await get_from_api(endpoint)
+
+
+async def get_ticket_by_number(ticket_number):
+    endpoint = f'ticket/{ticket_number}/'
+    return await get_from_api(endpoint)
 
 
 '''
 Пример использования:
 ticket_number = '123'
-ticket_data = await get_ticket(ticket_number)
+ticket_data = await get_ticket_by_number(ticket_number)
 '''
