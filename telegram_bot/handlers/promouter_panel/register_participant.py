@@ -81,7 +81,6 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
     participant_data = data['participant_data']
-    print (participant_data)
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
