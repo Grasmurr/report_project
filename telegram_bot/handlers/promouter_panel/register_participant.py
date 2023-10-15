@@ -87,7 +87,7 @@ async def confirm_participant(message: Message, state: FSMContext):
                               f'Курс: {participant_data["Курс"]}\n'
                               f'Цена билета: {participant_data["Цена билета"]}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
-                              f'Вид билета: {ticket_type}'', reply_markup=markup)
+                              f'Вид билета: {ticket_type}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
