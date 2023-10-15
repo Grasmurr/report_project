@@ -16,7 +16,7 @@ class Ticket(models.Model):
 
 
 class Promouter(models.Model):
-    user_id = models.IntegerField(unique=True)
+    user_id = models.BigIntegerField(unique=True)
     username = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
 
