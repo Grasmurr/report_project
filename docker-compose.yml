@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  telegram_bot:
+    build:
+      context: ./telegram_bot
+    depends_on:
+      - repository
+    environment:
+      - DATABASE_URL=postgresql://admin:prod@repository:5432/postgres
+
+  repository:
+    build:
+      context: ./repository
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=prod
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

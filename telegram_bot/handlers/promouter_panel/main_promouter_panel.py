@@ -1,4 +1,4 @@
-from service.telegram_bot.loader import dp, bot
+from telegram_bot.loader import dp, bot
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import \
     (Message,
@@ -9,24 +9,15 @@ from aiogram.types import \
      InlineKeyboardButton,
      ReplyKeyboardRemove
      )
-from service.telegram_bot.helpers import chat_backends
+from telegram_bot.helpers import chat_backends
 from aiogram import F
 from aiogram.enums.content_type import ContentType
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import BufferedInputFile
-from service.telegram_bot.states import PromouterStates
+from telegram_bot.states import PromouterStates
 
-from service.telegram_bot.helpers.chat_backends import create_keyboard_buttons
-
-
-@dp.message(CommandStart())
-async def promouter_menu(message: Message, state: FSMContext):
-    await state.set_state(PromouterStates.begin_registration)
-    markup = create_keyboard_buttons('Зарегистрироваться')
-    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
-                         f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
-                         reply_markup=markup)
+from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 
 @dp.message(PromouterStates.begin_registration)
@@ -49,7 +40,7 @@ async def identify_promouter_number(message: Message, state: FSMContext):
 
     if message.isdigit:
         await state.set_state(PromouterStates.main_enter_course)
-        markup = chat_backends.create_keyboard_buttons('Бизнес информатика','Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ',
+        markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ',
                                                                  'РиСО', 'Социология', 'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП", 'Не ВШЭ')
 
         await message.answer(f'Спасибо! Скажите, на какой образовательной программе вы учитесь?', reply_markup=markup)
