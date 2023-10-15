@@ -13,3 +13,5 @@ def main():
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     asyncio.run(start_bot())
 
+
+main()
