@@ -9,11 +9,14 @@ from aiogram.fsm.context import FSMContext
 from telegram_bot.states import PromouterStates
 
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
+from telegram_bot.repository.api_methods import get_all_events
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Оформить возврат")
 async def choose_event_for_refund(message: Message, state: FSMContext):
-    markup = chat_backends.create_keyboard_buttons('Мероприятие 1', 'Мероприятие 2', 'Назад')
+    events = await get_all_events()
+    event_names = [event['name'] for event in events['data']]
+    markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
     await state.set_state(PromouterStates.choose_event_for_participants_refund)
     await message.answer(text='Выберите мероприятие, на которое был куплен билет',
                          reply_markup=markup)

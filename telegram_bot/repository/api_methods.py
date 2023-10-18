@@ -9,11 +9,11 @@ import json
 
 
 async def send_to_api(endpoint, data):
-    url = f'http://django_app:8000/api/{endpoint}'
+    url = f'http://djangoapp:8000/api/{endpoint}'
     headers = {'Content-Type': 'application/json'}
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=json.dumps(data), headers=headers) as response:
+        async with session.post(url=url, data=json.dumps(data), headers=headers) as response:
             if response.status != 200:
                 # Handle error
                 response_data = await response.text()
@@ -69,7 +69,7 @@ await create_promouter(user_id, username, full_name)
 
 
 async def get_from_api(endpoint, params=None):
-    url = f'http://django_app:8000/api/{endpoint}'
+    url = f'http://djangoapp:8000/api/{endpoint}'
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, params=params) as response:
@@ -86,7 +86,7 @@ async def get_all_promouters():
 
 
 async def get_promouter(user_id):
-    endpoint = f'promouter/{user_id}/'
+    endpoint = f'get_promouter/{user_id}/'
     return await get_from_api(endpoint)
 
 
@@ -106,12 +106,12 @@ async def get_tickets_by_type(ticket_type):
 
 
 async def get_event_by_name(name):
-    endpoint = f'event/{name}/'
+    endpoint = f'get_event/{name}/'
     return await get_from_api(endpoint)
 
 
 async def get_ticket_by_number(ticket_number):
-    endpoint = f'ticket/{ticket_number}/'
+    endpoint = f'get_ticket/{ticket_number}/'
     return await get_from_api(endpoint)
 
 
