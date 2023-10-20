@@ -19,6 +19,9 @@ from telegram_bot.states import PromouterStates
 
 from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
+from telegram_bot.repository import api_methods
+from telegram_bot.handlers.promouter_panel import main_promouter_panel
+
 # @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
 # async def back_from_upload_data_in_format_final (message: Message, state: FSMContext):
 #     await choose_format_for_uploading_data(message, state)
@@ -28,8 +31,17 @@ from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 @dp.message(CommandStart())
 async def promouter_menu(message: Message, state: FSMContext):
-    await state.set_state(PromouterStates.begin_registration)
+
     markup = create_keyboard_buttons('Зарегистрироваться')
-    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
-                         f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
-                         reply_markup=markup)
+
+    is_registered = await api_methods.get_promouter(message.from_user.id)
+
+    print(is_registered)
+
+    if len(is_registered['data']) != 0:
+        await main_promouter_panel.accepted_promouter_panel(message, state)
+    else:
+        await state.set_state(PromouterStates.begin_registration)
+        await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
+                             f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
+                             reply_markup=markup)

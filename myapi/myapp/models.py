@@ -25,14 +25,15 @@ class Ticket(models.Model):
         choices=TICKET_TYPE_CHOICES,
         default=REGULAR,
     )
-    date_of_birth = models.CharField(max_length=255)
-    price = models.IntegerField()
-    educational_program = models.CharField(max_length=255)
+    date_of_birth = models.CharField(max_length=255, default='2000-01-01')
+    price = models.IntegerField(null=True)
+    educational_program = models.CharField(max_length=255, null=True)
 
 
 class Promouter(models.Model):
     user_id = models.BigIntegerField(unique=True)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
+    phone_number = models.BigIntegerField(null=True, default='987654321')
 
 

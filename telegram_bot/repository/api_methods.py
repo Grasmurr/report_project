@@ -22,12 +22,13 @@ async def send_to_api(endpoint, data):
                 return await response.json()
 
 
-async def create_promouter(user_id, username, full_name):
+async def create_promouter(user_id, username, full_name, phone_number):
     endpoint = 'promouter/'
     data = {
         'user_id': user_id,
         'username': username,
-        'full_name': full_name
+        'full_name': full_name,
+        'phone_number': phone_number
     }
     return await send_to_api(endpoint, data)
 

@@ -20,8 +20,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
-
-
+from telegram_bot.repository import api_methods
 
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
@@ -34,8 +33,11 @@ async def identify_promouter(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.enter_initials)
 async def identify_promouter_number(message: Message, state: FSMContext):
-    print(message.text)
+
     if len(message.text.split()) == 2:
+        name = message.text
+        await state.update_data(name=name)
+
         await state.set_state(PromouterStates.waitng_for_admin_accept)
         await message.answer(f'Спасибо! Введите, пожалуйста, свой номер телефона в формате "89991234567"',
                              reply_markup=ReplyKeyboardRemove())
@@ -48,6 +50,13 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 
     if message.text.isdigit() and len(message.text.split()) == 1:
         await state.set_state(PromouterStates.accepted_promouter_panel)
+
+        usname = message.from_user.username
+        if usname:
+            usname = f'@{usname}'
+        else:
+            usname = 'Отсутствует'
+        await state.update_data(phone=int(message.text), username=usname)
 
         builder = InlineKeyboardBuilder()
         builder.button(text='Подтвердить', callback_data=f'allow{message.from_user.id}')
@@ -67,14 +76,21 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 @dp.callback_query(PromouterStates.accepted_promouter_panel)
 async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     ans = call.data
+    user_id = ans[5:]
+
     if ans[:5] == 'allow':
-        await bot.send_message(chat_id=ans[5:], text='Админ подтвердил вашу заявку!')
+        await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!')
         await state.set_state(PromouterStates.main_accepted_promouter_panel)
         markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                        "Оформить возврат")
-        await bot.send_message(chat_id=ans[5:],
+        await bot.send_message(chat_id=user_id,
                                text=f'Добро пожаловать в панель промоутера',
                                reply_markup=markup)
+        data = await state.get_data()
+        await api_methods.create_promouter(user_id=user_id,
+                                           username=data['username'],
+                                           full_name=data['name'],
+                                           phone_number=data['phone'])
     else:
         await state.set_state(PromouterStates.begin_registration)
         markup = create_keyboard_buttons('Зарегистрироваться')
