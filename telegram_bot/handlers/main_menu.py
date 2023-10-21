@@ -38,7 +38,7 @@ async def promouter_menu(message: Message, state: FSMContext):
 
     print(is_registered)
 
-    if len(is_registered['data']) != 0:
+    if is_registered and len(is_registered['data']) != 0:
         await main_promouter_panel.accepted_promouter_panel(message, state)
     else:
         await state.set_state(PromouterStates.begin_registration)

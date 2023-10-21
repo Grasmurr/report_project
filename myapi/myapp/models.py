@@ -34,6 +34,7 @@ class Promouter(models.Model):
     user_id = models.BigIntegerField(unique=True)
     username = models.CharField(max_length=255, null=True)
     full_name = models.CharField(max_length=255)
-    phone_number = models.BigIntegerField(null=True, default='987654321')
+    phone_number = models.BigIntegerField(null=True, default='99999999')
+
 
 

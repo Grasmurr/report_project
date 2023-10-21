@@ -4,6 +4,10 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 import json
 from .models import Promouter, Event, Ticket
 
@@ -57,3 +61,13 @@ class TicketView(View):
         else:
             tickets = Ticket.objects.all().values()
             return JsonResponse({'data': list(tickets)}, safe=False)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TicketView(APIView):
+    def delete(self, request, ticket_number=None):
+        if ticket_number:
+            ticket = get_object_or_404(Ticket, ticket_number=ticket_number)
+            ticket.delete()
+            return Response({'message': 'Ticket deleted successfully'})
+        else:
+            return Response({'message': 'Ticket number is required'})

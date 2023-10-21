@@ -10,6 +10,8 @@ from telegram_bot.states import PromouterStates
 
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
 from telegram_bot.repository.api_methods import get_all_events
+from telegram_bot.repository.api_methods import delete_ticket, get_ticket_by_number
+
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Оформить возврат")
@@ -75,8 +77,24 @@ async def back_from_confirm_ticket_data_for_refund(message: Message, state: FSMC
 
 @dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
 async def refund_ends(message: Message, state: FSMContext):
+    data = await state.get_data()
+    ticket_number_for_refund = data['ticket_number_for_refund']
+
+    ticket = await get_ticket_by_number(ticket_number_for_refund)
+    if not ticket:
+        await message.answer(text='Извините, билет с таким номером не найден. Попробуйте еще раз.', reply_markup = 'Назад')
+        return
+
+    await delete_ticket(ticket_number_for_refund)
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
+
+# @dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
+# async def refund_ends(message: Message, state: FSMContext):
+#     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
+#                                                    "Оформить возврат")
+#     await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)
+#     await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
