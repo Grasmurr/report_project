@@ -73,7 +73,9 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=572319915,
-                               text=f'Подтвердить регистрацию промоутера: \n\nИмя:{usname}\nНомер телефона:+{int(phone_number)}?',
+                               text=f'Подтвердить регистрацию промоутера? \n\nИмя: {message.from_user.full_name}'
+                                    f'\nUsername: {usname}'
+                                    f'\nНомер телефона: +{int(phone_number)}',
                                reply_markup=markup)
 
         await message.answer(f'Спасибо! Скоро админ проверит вашу заявку', reply_markup=ReplyKeyboardRemove())
