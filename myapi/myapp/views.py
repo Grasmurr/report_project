@@ -11,6 +11,11 @@ from rest_framework.response import Response
 import json
 from .models import Promouter, Event, Ticket
 
+import csv
+from openpyxl import Workbook
+from django.http import HttpResponse
+from django.shortcuts import render
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PromouterView(View):
@@ -72,3 +77,18 @@ class TicketDeleteView(APIView):
             return Response({'message': 'Ticket deleted successfully'})
         else:
             return Response({'message': 'Ticket number is required'})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TicketExportCsv(View):
+    def get(self, request, event_name):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program'])
+
+        tickets = Ticket.objects.filter(event_name=event_name)
+        for ticket in tickets:
+            writer.writerow([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program])
+
+        return response

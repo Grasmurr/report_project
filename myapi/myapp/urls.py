@@ -14,5 +14,6 @@ urlpatterns = [
     path('ticket/', views.TicketView.as_view(), name='insert_ticket'),
     path('tickets/', views.TicketView.as_view(), name='get_all_tickets'),
     path('tickets/<str:ticket_type>/', views.TicketView.as_view(), name='get_tickets_by_type'),
-    path('ticket_delete/<int:ticket_number>/', views.TicketDeleteView.as_view(), name='delete_ticket')
+    path('ticket_delete/<int:ticket_number>/', views.TicketDeleteView.as_view(), name='delete_ticket'),
+    path('export-tickets/<int:event_id>/', views.TicketExportCsv.as_view(), name='export_tickets_csv')
 ]
