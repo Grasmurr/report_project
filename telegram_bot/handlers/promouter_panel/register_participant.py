@@ -12,6 +12,9 @@ from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_
 from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
+from myapi.myapp.models import Event
+from django.http import HttpResponse, JsonResponse
+
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
@@ -118,6 +121,14 @@ async def registration_ends(message: Message, state: FSMContext):
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
+
+
+def get_event_by_name(name):
+    try:
+        event = Event.objects.get(name=name)
+    except Event.DoesNotExist:
+        return JsonResponse({'error': 'Event not found'}, status=404)
+    return event
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
