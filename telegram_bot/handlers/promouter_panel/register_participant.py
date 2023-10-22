@@ -109,7 +109,9 @@ async def confirm_participant(message: Message, state: FSMContext):
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
-    await api_methods.create_ticket(event_name=data['participant_event'],
+    event = get_event_by_name(data['participant_event'])
+
+    await api_methods.create_ticket(Event=event,
                                     ticket_number=150,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],

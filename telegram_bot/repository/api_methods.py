@@ -56,12 +56,11 @@ async def create_event(name, nm_prime, nm_usual):
     return await send_to_api(endpoint, data)
 
 
-async def create_ticket(Event, event_name, ticket_number, name, surname, ticket_type, date_of_birth, price, educational_program, educational_course):
+async def create_ticket(Event, ticket_number, name, surname, ticket_type, date_of_birth, price, educational_program, educational_course):
     endpoint = 'ticket/'
 
     data = {
         'event': Event,
-        'event_name': event_name,
         'ticket_number': ticket_number,
         'ticket_holder_name': name,
         'ticket_holder_surname': surname,
