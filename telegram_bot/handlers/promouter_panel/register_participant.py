@@ -43,25 +43,28 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
                               'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
-def validate_participant_data(name, phone_number, birth_date, course, ticket_price):
+def check_participant_data(name, phone_number, birth_date, course, ticket_price):
     # Проверка имени и фамилии
-    if not re.match(r'^[A-Za-zА-Яа-я]+\s[A-Za-zА-Яа-я]+$', name):
+    name_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
+    if not re.match(name_pattern, name):
         return False
 
     # Проверка номера телефона
-    if not re.match(r'^\d{10}$', phone_number):
+    phone_pattern = r"^\+?[0-9\s()-]+$"
+    if not re.match(phone_pattern, phone_number):
         return False
 
     # Проверка даты рождения
-    if not re.match(r'^\d{2}:\d{2}:\d{4}$', birth_date):
+    date_pattern = r"^\d{2}:\d{2}:\d{4}$"
+    if not re.match(date_pattern, birth_date):
         return False
 
     # Проверка курса
-    if not re.match(r'^\d$', course):
+    if not course.isdigit():
         return False
 
     # Проверка цены билета
-    if not re.match(r'^\d{1,5}$', ticket_price):
+    if not ticket_price.isdigit() or int(ticket_price) > 10000:
         return False
 
     return True
@@ -76,13 +79,13 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_surname = data_blocks[0].split()[1]
     participant_number = data_blocks[1]
     participant_date_of_birth = data_blocks[2]
-    participant_course = int(data_blocks[3])
-    participant_ticket_price = int(data_blocks[4])
+    participant_course = data_blocks[3]
+    participant_ticket_price = data_blocks[4]
 
     print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
 
     # Проверка данных участника
-    if not validate_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
+    if not check_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
 
@@ -90,8 +93,8 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                             participant_surname=participant_surname,
                             participant_number=participant_number,
                             participant_date_of_birth=participant_date_of_birth,
-                            participant_course=participant_course,
-                            participant_ticket_price=participant_ticket_price)
+                            participant_course=int(participant_course),
+                            participant_ticket_price=int(participant_ticket_price))
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
                                                    'МИЭФ', 'ПАД', 'ПМИ',
@@ -128,19 +131,19 @@ async def confirm_participant(message: Message, state: FSMContext):
     data = await state.get_data()
     participant_name = data['participant_name'],
     participant_surname = data['participant_surname'],
-    participant_number = data[participant_number],
-    participant_date_of_birth = participant_date_of_birth,
-    participant_course = participant_course,
-    participant_ticket_price = participant_ticket_price
-    participant_data = data['participant_data']
+    participant_number = data['participant_number'],
+    participant_date_of_birth = data["participant_date_of_birth"],
+    participant_course = data['participant_course'],
+    participant_ticket_price = data['participant_ticket_price']
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
-                              f'Имя Фамилия : {participant_data["Имя Фамилия"]}\n'
-                              f'Номер телефона: {participant_data["Номер телефона"]}\n'
-                              f'Курс: {participant_data["Курс"]}\n'
-                              f'Цена билета: {participant_data["Цена билета"]}\n'
+                              f'Имя Фамилия : {participant_name} {participant_surname}\n'
+                              f'Номер телефона: {participant_number}\n'
+                              f'Дата рождения:{participant_date_of_birth}\n'
+                              f'Курс: {participant_course}\n'
+                              f'Цена билета: {participant_ticket_price}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
                               f'Вид билета: {ticket_type}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
