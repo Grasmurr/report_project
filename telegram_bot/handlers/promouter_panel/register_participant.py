@@ -169,12 +169,12 @@ async def registration_ends(message: Message, state: FSMContext):
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
 
-def get_event_by_name(name):
-    try:
-        event = Event.objects.get(name=name)
-    except Event.DoesNotExist:
-        return JsonResponse({'error': 'Event not found'}, status=404)
-    return event
+# def get_event_by_name(name):
+#     try:
+#         event = Event.objects.get(name=name)
+#     except Event.DoesNotExist:
+#         return JsonResponse({'error': 'Event not found'}, status=404)
+#     return event
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
