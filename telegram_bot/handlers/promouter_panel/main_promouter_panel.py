@@ -73,7 +73,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=572319915,
-                               text='Подтвердить регистрацию промоутера?',
+                               text=f'Подтвердить регистрацию промоутера: \n\nИмя:{usname}\nНомер телефона:+{int(phone_number)}?',
                                reply_markup=markup)
 
         await message.answer(f'Спасибо! Скоро админ проверит вашу заявку', reply_markup=ReplyKeyboardRemove())
@@ -90,6 +90,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     user_id = ans[5:]
 
     if ans[:5] == 'allow':
+
         await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!')
         await state.set_state(PromouterStates.main_accepted_promouter_panel)
         markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
