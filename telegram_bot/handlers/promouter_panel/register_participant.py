@@ -36,7 +36,7 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
     # непонятно как сохранять мероприятие @рома
     await state.set_state(PromouterStates.enter_personal_data_of_participant)
     await message.answer(text='Введите данные участника в формате:\n\n'
-                              'Имя Фамилия \nНомер телефона\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
+                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message(PromouterStates.enter_personal_data_of_participant)
@@ -47,8 +47,9 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_name = data_blocks[0].split()[0]
     participant_surname = data_blocks[0].split()[1]
     participant_number = data_blocks[1]
-    participant_course = int(data_blocks[2])
-    participant_ticket_price = int(data_blocks[3])
+    participant_date_of_birth = data_blocks[2]
+    participant_course = int(data_blocks[3])
+    participant_ticket_price = int(data_blocks[4])
 
     await state.update_data(participant_name=participant_name,
                             participant_surname=participant_surname,
@@ -109,7 +110,9 @@ async def registration_ends(message: Message, state: FSMContext):
                                     ticket_number=150,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],
-                                    ticket_type=data['ticket_type'])
+                                    ticket_type=data['ticket_type'],
+                                    date_of_birth=data['participant_date_of_birth'],
+                                    price=data[])
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
