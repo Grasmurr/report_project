@@ -44,12 +44,10 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
 
 def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
     # Проверка имени и фамилии
-    name_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
-    if not re.match(name_pattern, name):
+    if not name.isalpha():
         return False
 
-    surname_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
-    if not re.match(surname_pattern, surname):
+    if not surname.isalpha():
         return False
 
     phone_number = ''.join([i for i in phone_number if i.isdigit()])
@@ -86,7 +84,12 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
 
     # Проверка данных участника
-    if not check_participant_data(participant_name, participant_surname, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
+    if not check_participant_data(name=participant_name,
+                                  surname=participant_surname,
+                                  phone_number=participant_number,
+                                  birth_date=participant_date_of_birth,
+                                  course=participant_course,
+                                  ticket_price=participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
 
@@ -154,6 +157,14 @@ async def confirm_participant(message: Message, state: FSMContext):
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
     event = await api_methods.get_event(data['participant_event'])
+
+    print(event, data['participant_name'],
+                                    data['participant_surname'],
+                                    data['ticket_type'],
+                                    data['participant_date_of_birth'],
+                                    data['participant_ticket_price'],
+                                    data['participant_ep'],
+                                    data['participant_course'])
 
     await api_methods.create_ticket(Event=event,
                                     ticket_number=150,
