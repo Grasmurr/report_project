@@ -42,18 +42,20 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
                               'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
-def check_participant_data(name, phone_number, birth_date, course, ticket_price):
+def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
     # Проверка имени и фамилии
     name_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
     if not re.match(name_pattern, name):
         return False
 
-    # Проверка номера телефона
-    phone_pattern = r"^\+?[0-9\s()-]+$"
-    if not re.match(phone_pattern, phone_number):
+    surname_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
+    if not re.match(surname_pattern, surname):
         return False
 
-    # Проверка даты рождения
+    phone_number = ''.join([i for i in phone_number if i.isdigit()])
+    if not phone_number.isdigit() or len(phone_number) != 11:
+        return False
+
     date_pattern = r"^\d{2}:\d{2}:\d{4}$"
     if not re.match(date_pattern, birth_date):
         return False
@@ -62,7 +64,6 @@ def check_participant_data(name, phone_number, birth_date, course, ticket_price)
     if not course.isdigit():
         return False
 
-    # Проверка цены билета
     if not ticket_price.isdigit() or int(ticket_price) > 10000:
         return False
 
@@ -74,6 +75,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
+    print(data_blocks)
     participant_name = data_blocks[0].split()[0]
     participant_surname = data_blocks[0].split()[1]
     participant_number = data_blocks[1]
