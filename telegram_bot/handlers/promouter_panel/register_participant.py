@@ -86,7 +86,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
 
     # Проверка данных участника
-    if not check_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
+    if not check_participant_data(participant_name, participant_surname, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
 
