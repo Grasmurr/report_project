@@ -128,11 +128,11 @@ async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
-    participant_name = data['participant_name'],
-    participant_surname = data['participant_surname'],
-    participant_number = data['participant_number'],
-    participant_date_of_birth = data["participant_date_of_birth"],
-    participant_course = data['participant_course'],
+    participant_name = data['participant_name']
+    participant_surname = data['participant_surname']
+    participant_number = data['participant_number']
+    participant_date_of_birth = data["participant_date_of_birth"]
+    participant_course = data['participant_course']
     participant_ticket_price = data['participant_ticket_price']
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
