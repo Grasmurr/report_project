@@ -44,13 +44,17 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
-    participant_data = {
-        'Имя Фамилия': data_blocks[0],
-        'Номер телефона': data_blocks[1],
-        'Курс': int(data_blocks[2]),
-        'Цена билета': int(data_blocks[3])
-    }
-    await state.update_data(participant_data=participant_data)
+    participant_name = data_blocks[0].split()[0]
+    participant_surname = data_blocks[0].split()[1]
+    participant_number = data_blocks[1]
+    participant_course = int(data_blocks[2])
+    participant_ticket_price = int(data_blocks[3])
+
+    await state.update_data(participant_name=participant_name,
+                            participant_surname=participant_surname,
+                            participant_number=participant_number,
+                            participant_course=participant_course,
+                            participant_ticket_price=participant_ticket_price)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
                                                    'МИЭФ', 'ПАД', 'ПМИ',
@@ -103,8 +107,8 @@ async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
     await api_methods.create_ticket(event_name=data['participant_event'],
                                     ticket_number=150,
-                                    name=data['participant_data'].split()[0],
-                                    surname=data['participant_data'].split()[1],
+                                    name=data['participant_name'],
+                                    surname=data['participant_surname'],
                                     ticket_type=data['ticket_type'])
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",

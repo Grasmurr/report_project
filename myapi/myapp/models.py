@@ -28,6 +28,7 @@ class Ticket(models.Model):
     date_of_birth = models.CharField(max_length=255, default='2000-01-01')
     price = models.IntegerField(null=True)
     educational_program = models.CharField(max_length=255, null=True)
+    educational_course = models.IntegerField(null=True)
 
 
 class Promouter(models.Model):
