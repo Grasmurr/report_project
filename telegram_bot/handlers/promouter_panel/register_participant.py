@@ -112,7 +112,9 @@ async def registration_ends(message: Message, state: FSMContext):
                                     surname=data['participant_surname'],
                                     ticket_type=data['ticket_type'],
                                     date_of_birth=data['participant_date_of_birth'],
-                                    price=data[])
+                                    price=data['participant_ticket_price'],
+                                    educational_program=data['participant_ep'],
+                                    educational_course=data['participant_course'])
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
