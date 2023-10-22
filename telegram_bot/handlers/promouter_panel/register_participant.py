@@ -79,6 +79,8 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_course = int(data_blocks[3])
     participant_ticket_price = int(data_blocks[4])
 
+    print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
+
     # Проверка данных участника
     if not validate_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
@@ -124,6 +126,12 @@ async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
+    participant_name = data['participant_name'],
+    participant_surname = data['participant_surname'],
+    participant_number = data[participant_number],
+    participant_date_of_birth = participant_date_of_birth,
+    participant_course = participant_course,
+    participant_ticket_price = participant_ticket_price
     participant_data = data['participant_data']
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
