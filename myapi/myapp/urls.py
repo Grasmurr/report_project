@@ -11,7 +11,7 @@ urlpatterns = [
     path('get_event/<str:name>/', views.EventView.as_view(), name='get_event'),
     path('event/', views.EventView.as_view(), name='insert_event'),
     path('events/', views.EventView.as_view(), name='get_all_events'),
-    path('api/event/<str:name>/', EventAPIView.as_view(), name='api_event_detail'),
+    path('event/<str:name>/', EventAPIView.as_view(), name='api_event_detail'),
 
     path('get_ticket/<int:ticket_number>/', views.TicketView.as_view(), name='get_ticket'),
     path('ticket/', views.TicketView.as_view(), name='insert_ticket'),

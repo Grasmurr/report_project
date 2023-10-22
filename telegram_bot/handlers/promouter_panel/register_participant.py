@@ -73,8 +73,9 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
-    print(data_blocks)
+    print(data_blocks[0])
     participant_name = data_blocks[0].split()[0]
+    print(participant_name)
     participant_surname = data_blocks[0].split()[1]
     participant_number = data_blocks[1]
     participant_date_of_birth = data_blocks[2]
@@ -133,6 +134,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
+    print(data)
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
     participant_number = data['participant_number']
@@ -144,10 +146,10 @@ async def confirm_participant(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name[0]} {participant_surname[0]}\n'
-                              f'Номер телефона: {participant_number[0]}\n'
+                              f'Номер телефона: {participant_number}\n'
                               f'Дата рождения:{participant_date_of_birth[0]}\n'
-                              f'Курс: {participant_course[0]}\n'
-                              f'Цена билета: {participant_ticket_price[0]}\n'
+                              f'Курс: {participant_course}\n'
+                              f'Цена билета: {participant_ticket_price}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
                               f'Вид билета: {ticket_type}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
@@ -156,17 +158,17 @@ async def confirm_participant(message: Message, state: FSMContext):
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
-    event = await api_methods.get_event(data['participant_event'])
+    # event = await api_methods.get_event(data['participant_event'])
+    #
+    # print(event, data['participant_name'],
+    #                                 data['participant_surname'],
+    #                                 data['ticket_type'],
+    #                                 data['participant_date_of_birth'],
+    #                                 data['participant_ticket_price'],
+    #                                 data['participant_ep'],
+    #                                 data['participant_course'])
 
-    print(event, data['participant_name'],
-                                    data['participant_surname'],
-                                    data['ticket_type'],
-                                    data['participant_date_of_birth'],
-                                    data['participant_ticket_price'],
-                                    data['participant_ep'],
-                                    data['participant_course'])
-
-    await api_methods.create_ticket(Event=event,
+    await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=150,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],
@@ -198,8 +200,4 @@ async def change_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.confirm_participant, F.text == "Ввести данные участника заново")
 async def remake_registration(message: Message, state: FSMContext):
     await enter_ticket_type(message, state)
-
-
-
-
 

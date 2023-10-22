@@ -16,7 +16,7 @@ class Ticket(models.Model):
         (PRIME, 'Prime'),
     ]
 
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event = models.CharField(max_length=255)
     ticket_number = models.CharField(max_length=255, unique=True)
     ticket_holder_name = models.CharField(max_length=255)
     ticket_holder_surname = models.CharField(max_length=255)
