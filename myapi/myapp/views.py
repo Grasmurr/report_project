@@ -62,8 +62,9 @@ class TicketView(View):
             tickets = Ticket.objects.all().values()
             return JsonResponse({'data': list(tickets)}, safe=False)
 
+
 @method_decorator(csrf_exempt, name='dispatch')
-class TicketView(APIView):
+class TicketDeleteView(APIView):
     def delete(self, request, ticket_number=None):
         if ticket_number:
             ticket = get_object_or_404(Ticket, ticket_number=ticket_number)
