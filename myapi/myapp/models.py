@@ -36,5 +36,3 @@ class Promouter(models.Model):
     full_name = models.CharField(max_length=255)
     phone_number = models.BigIntegerField(null=True, default='99999999')
 
-
-

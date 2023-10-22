@@ -22,6 +22,9 @@ from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 from telegram_bot.repository import api_methods
 
+
+
+
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
     # if message in data:
@@ -33,22 +36,29 @@ async def identify_promouter(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.enter_initials)
 async def identify_promouter_number(message: Message, state: FSMContext):
+    button_phone = [KeyboardButton(text="Отправить номер", request_contact=True)]
+    keyboard = ReplyKeyboardMarkup(keyboard=[button_phone], row_width=1, resize_keyboard=True)
 
     if len(message.text.split()) == 2:
         name = message.text
-        await state.update_data(name=name)
+        user_id = message.from_user.id
+        if user_id not in data:
+            data[user_id] = {}
+
+        data[user_id]['name'] = name
 
         await state.set_state(PromouterStates.waitng_for_admin_accept)
-        await message.answer(f'Спасибо! Введите, пожалуйста, свой номер телефона в формате "89991234567"',
-                             reply_markup=ReplyKeyboardRemove())
+        await message.answer(f'Спасибо! Для продолжения, отправьте нам номер телефона через кнопку ниже',
+                             reply_markup=keyboard)
     else:
         await message.answer('Пожалуйста, введите имя и фамилию в формате "Иван Иванов"')
 
 
 @dp.message(PromouterStates.waitng_for_admin_accept)
 async def waiting_for_admin_accept(message: Message, state: FSMContext):
+    if message.contact:
+        phone_number = message.contact.phone_number
 
-    if message.text.isdigit() and len(message.text.split()) == 1:
         await state.set_state(PromouterStates.accepted_promouter_panel)
 
         usname = message.from_user.username
@@ -56,7 +66,10 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
             usname = f'@{usname}'
         else:
             usname = 'Отсутствует'
-        await state.update_data(phone=int(message.text), username=usname)
+        user_id = message.from_user.id
+
+        data[user_id]['username'] = usname
+        data[user_id]['phone'] = int(phone_number)
 
         builder = InlineKeyboardBuilder()
         builder.button(text='Подтвердить', callback_data=f'allow{message.from_user.id}')
@@ -64,16 +77,18 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=572319915,
-                                 text='Подтвердить регистрацию промоутера?',
-                                 reply_markup=markup)
+                               text='Подтвердить регистрацию промоутера?',
+                               reply_markup=markup)
 
         await message.answer(f'Спасибо! Скоро админ проверит вашу заявку', reply_markup=ReplyKeyboardRemove())
 
     else:
-        await message.answer(f'Пожалуйста, введите свой номер телефона в формате "89991234567"')
+        button_phone = [KeyboardButton(text="Отправить номер", request_contact=True)]
+        keyboard = ReplyKeyboardMarkup(keyboard=[button_phone], row_width=1, resize_keyboard=True)
+        await message.answer(f'Пожалуйста, нажмите кнопку ниже для отправки номера телефона', reply_markup=keyboard)
 
 
-@dp.callback_query(PromouterStates.accepted_promouter_panel)
+@dp.callback_query(lambda call: call.data.startswith('allow') or call.data.startswith('decline'))
 async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     ans = call.data
     user_id = ans[5:]
@@ -86,11 +101,11 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
         await bot.send_message(chat_id=user_id,
                                text=f'Добро пожаловать в панель промоутера',
                                reply_markup=markup)
-        data = await state.get_data()
+        user_data = {}
         await api_methods.create_promouter(user_id=user_id,
-                                           username=data['username'],
-                                           full_name=data['name'],
-                                           phone_number=data['phone'])
+                                           username=user_data['username'],
+                                           full_name=user_data['name'],
+                                           phone_number=user_data['phone'])
     else:
         await state.set_state(PromouterStates.begin_registration)
         markup = create_keyboard_buttons('Зарегистрироваться')
