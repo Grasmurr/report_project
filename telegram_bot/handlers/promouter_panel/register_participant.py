@@ -14,6 +14,7 @@ from telegram_bot.repository import api_methods
 
 from myapi.myapp.models import Event
 from django.http import HttpResponse, JsonResponse
+import re
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
@@ -42,6 +43,30 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
                               'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
+def validate_participant_data(name, phone_number, birth_date, course, ticket_price):
+    # Проверка имени и фамилии
+    if not re.match(r'^[A-Za-zА-Яа-я]+\s[A-Za-zА-Яа-я]+$', name):
+        return False
+
+    # Проверка номера телефона
+    if not re.match(r'^\d{10}$', phone_number):
+        return False
+
+    # Проверка даты рождения
+    if not re.match(r'^\d{2}:\d{2}:\d{4}$', birth_date):
+        return False
+
+    # Проверка курса
+    if not re.match(r'^\d$', course):
+        return False
+
+    # Проверка цены билета
+    if not re.match(r'^\d{1,5}$', ticket_price):
+        return False
+
+    return True
+
+
 @dp.message(PromouterStates.enter_personal_data_of_participant)
 async def enter_education_program_of_participant(message: Message, state: FSMContext):
     participant_data = message.text
@@ -54,9 +79,15 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_course = int(data_blocks[3])
     participant_ticket_price = int(data_blocks[4])
 
+    # Проверка данных участника
+    if not validate_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
+        await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
+        return
+
     await state.update_data(participant_name=participant_name,
                             participant_surname=participant_surname,
                             participant_number=participant_number,
+                            participant_date_of_birth=participant_date_of_birth,
                             participant_course=participant_course,
                             participant_ticket_price=participant_ticket_price)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
@@ -65,6 +96,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                                                    'РиСО', 'Социология', 'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН',
                                                    'ФЭН', "Другая ОП", 'Не ВШЭ', 'Назад')
     await message.answer(text='Выберите образовательную программу, на которой обучается участник', reply_markup=markup)
+
 
 
 @dp.message(PromouterStates.enter_education_program_of_participant, F.text == 'Назад')
