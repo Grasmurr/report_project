@@ -10,6 +10,7 @@ from telegram_bot.states import PromouterStates
 
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
 from telegram_bot.repository.api_methods import get_all_events
+from telegram_bot.repository import api_methods
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
@@ -99,6 +100,13 @@ async def confirm_participant(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
+    data = await state.get_data()
+    await api_methods.create_ticket(event_name=data['participant_event'],
+                                    ticket_number=150,
+                                    name=data['participant_data'].split()[0],
+                                    surname=data['participant_data'].split()[1],
+                                    ticket_type=data['ticket_type'])
+
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
