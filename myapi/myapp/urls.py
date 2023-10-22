@@ -5,6 +5,7 @@ urlpatterns = [
     path('get_promouter/<int:user_id>/', views.PromouterView.as_view(), name='get_promouter'),
     path('promouter/', views.PromouterView.as_view(), name='insert_promouter'),
     path('promouters/', views.PromouterView.as_view(), name='get_all_promouters'),
+    path('promouter/<int:user_id>/', views.PromouterUpdateView.as_view(), name='promouter_update_delete'),
 
     path('get_event/<str:name>/', views.EventView.as_view(), name='get_event'),
     path('event/', views.EventView.as_view(), name='insert_event'),

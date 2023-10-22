@@ -32,6 +32,26 @@ class PromouterView(View):
             promouters = Promouter.objects.all().values()
             return JsonResponse({'data': list(promouters)}, safe=False)
 
+@method_decorator(csrf_exempt, name='dispatch')
+class PromouterUpdateView(View):
+    def post(self, request, user_id):
+        data = json.loads(request.body)
+        promouter, created = Promouter.objects.update_or_create(
+            user_id=user_id,
+            defaults=data
+        )
+        status_code = 201 if created else 200  # 201 Created если объект был создан, иначе 200 OK
+        return JsonResponse({'status': 'ok'}, status=status_code)
+
+    def delete(self, request, user_id):
+        try:
+            promouter = Promouter.objects.get(user_id=user_id)
+        except Promouter.DoesNotExist:
+            return JsonResponse({'error': 'Promouter not found'}, status=404)
+
+        promouter.delete()
+        return JsonResponse({'status': 'ok'}, status=200)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class EventView(View):

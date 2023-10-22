@@ -42,10 +42,7 @@ async def identify_promouter_number(message: Message, state: FSMContext):
     if len(message.text.split()) == 2:
         name = message.text
         user_id = message.from_user.id
-        if user_id not in data:
-            data[user_id] = {}
-
-        data[user_id]['name'] = name
+        await api_methods.update_promouter(user_id=user_id, full_name=name)
 
         await state.set_state(PromouterStates.waitng_for_admin_accept)
         await message.answer(f'Спасибо! Для продолжения, отправьте нам номер телефона через кнопку ниже',
@@ -68,8 +65,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
             usname = 'Отсутствует'
         user_id = message.from_user.id
 
-        data[user_id]['username'] = usname
-        data[user_id]['phone'] = int(phone_number)
+        await api_methods.update_promouter(user_id=user_id, username=usname, phone_number=int(phone_number))
 
         builder = InlineKeyboardBuilder()
         builder.button(text='Подтвердить', callback_data=f'allow{message.from_user.id}')
@@ -101,12 +97,9 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
         await bot.send_message(chat_id=user_id,
                                text=f'Добро пожаловать в панель промоутера',
                                reply_markup=markup)
-        user_data = {}
-        await api_methods.create_promouter(user_id=user_id,
-                                           username=user_data['username'],
-                                           full_name=user_data['name'],
-                                           phone_number=user_data['phone'])
     else:
+        await bot.send_message(chat_id=ans[7:], text='Админ отказал вам в заявке!')
+        await api_methods.delete_promouter(ans[7:])
         await state.set_state(PromouterStates.begin_registration)
         markup = create_keyboard_buttons('Зарегистрироваться')
         await bot.send_message(chat_id=ans[7:],

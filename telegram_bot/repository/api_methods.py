@@ -11,18 +11,28 @@ import csv
 ############################################################################################################
 
 
-async def send_to_api(endpoint, data):
+async def send_to_api(endpoint, data=None, method='POST'):
     url = f'http://djangoapp:8000/api/{endpoint}'
     headers = {'Content-Type': 'application/json'}
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=url, data=json.dumps(data), headers=headers) as response:
-            if response.status != 200:
-                # Handle error
-                response_data = await response.text()
-                print(f"Error: {response.status}. {response_data}")
-            else:
-                return await response.json()
+        if method == 'POST':
+            async with session.post(url=url, data=json.dumps(data), headers=headers) as response:
+                if response.status != 200:
+                    # Handle error
+                    response_data = await response.text()
+                    print(f"Error: {response.status}. {response_data}")
+                else:
+                    return await response.json()
+        elif method == 'DELETE':
+            async with session.delete(url=url, headers=headers) as response:
+                if response.status != 200:
+                    # Handle error
+                    response_data = await response.text()
+                    print(f"Error: {response.status}. {response_data}")
+                else:
+                    return await response.json()
+
 
 
 async def create_promouter(user_id, username, full_name, phone_number):
@@ -130,3 +140,26 @@ async def delete_ticket(ticket_number):
 ticket_number = '123'
 ticket_data = await get_ticket_by_number(ticket_number)
 '''
+
+############################################################################################################
+##                                                                                                        ##
+##                                          PUT METHODS                                                   ##
+##                                                                                                        ##
+############################################################################################################
+
+async def update_promouter(user_id, username=None, full_name=None, phone_number=None):
+    endpoint = f'update_promouter/{user_id}/'
+    data = {
+        'user_id': user_id,
+        'username': username,
+        'full_name': full_name,
+        'phone_number': phone_number
+    }
+    # Удалите None значения из данных
+    data = {k: v for k, v in data.items() if v is not None}
+    return await send_to_api(endpoint, data)
+
+
+async def delete_promouter(user_id):
+    endpoint = f'promouter/{user_id}/'
+    return await send_to_api(endpoint, method='DELETE')
