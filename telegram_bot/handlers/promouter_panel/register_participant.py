@@ -138,11 +138,11 @@ async def confirm_participant(message: Message, state: FSMContext):
     participant_event = data['participant_event']
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
-                              f'Имя Фамилия : {participant_name} {participant_surname}\n'
-                              f'Номер телефона: {participant_number}\n'
-                              f'Дата рождения:{participant_date_of_birth}\n'
-                              f'Курс: {participant_course}\n'
-                              f'Цена билета: {participant_ticket_price}\n'
+                              f'Имя Фамилия : {participant_name[0]} {participant_surname[0]}\n'
+                              f'Номер телефона: {participant_number[0]}\n'
+                              f'Дата рождения:{participant_date_of_birth[0]}\n'
+                              f'Курс: {participant_course[0]}\n'
+                              f'Цена билета: {participant_ticket_price[0]}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
                               f'Вид билета: {ticket_type}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
