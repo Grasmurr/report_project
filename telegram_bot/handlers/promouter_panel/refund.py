@@ -64,7 +64,7 @@ async def confirm_ticket_data_for_refund(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Подтвердить возврат', 'Назад')
     await state.set_state(PromouterStates.confirm_ticket_data_for_refund)
     await message.answer(
-        text=f'Вы собираетесь оформить возврат билета №{ticket_number_for_refund} типа "{ticket_type_for_refund}" '
+        text=f'Вы собираетесь подать заявку на возврат билета №{ticket_number_for_refund} типа "{ticket_type_for_refund}" '
              f'на мероприятие "{event_for_refund}". '
              f'Подтвердить?',
         reply_markup=markup)
@@ -75,21 +75,49 @@ async def back_from_confirm_ticket_data_for_refund(message: Message, state: FSMC
     await enter_number_of_ticket_for_refund(message, state)
 
 
-@dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
+@dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить заявку на возврат")
 async def refund_ends(message: Message, state: FSMContext):
     data = await state.get_data()
     ticket_number_for_refund = data['ticket_number_for_refund']
 
-    # ticket = await get_ticket_by_number(ticket_number_for_refund)
+    if False:
+        pass
+# TODO: автоматический чек на существование в целом такого билета в базе
+
+    else:
+        await message.answer(text=f"Ваша заявка на возврат билета отправлена администратору. "
+                              f"Пожалуйста, дождитесь одобрения возврата от него.")
+
+# TODO: отправить сообщение админу
+        await state.set_state(PromouterStates.get_admin_confirmation_to_refund)
+
+@dp.message(PromouterStates.get_admin_confirmation_to_refund)
+async def refund_confirmation(message: Message, state: FSMContext):
+        # if:
+            price = 2000
+            markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
+                                                   "Оформить возврат")
+            await message.answer(text=f"Ваша заявка на возврат билета одобрена администратором. "
+                                      f"Пожалуйста, верните {price} рублей покупателю данного билета.",
+                                 reply_markup=markup)
+            await state.set_state(PromouterStates.main_accepted_promouter_panel)
+        # else:
+        #     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
+        #                                                    "Оформить возврат")
+        #     await message.answer(text=f"Ваша заявка на возврат билета не одобрена администратором. "
+        #                               f"Пожалуйста, обратитесь к администратору (@URL) для уточнения причины.",
+        #                          reply_markup=markup)
+
+
+
+        # ticket = await get_ticket_by_number(ticket_number_for_refund)
     # if not ticket:
     #     await message.answer(text='Извините, билет с таким номером не найден. Попробуйте еще раз.', reply_markup = 'Назад')
     #     return
 
-    # await delete_ticket(ticket_number_for_refund)
-    markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                   "Оформить возврат")
-    await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)
-    await state.set_state(PromouterStates.main_accepted_promouter_panel)
+
+
+
 
 # @dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
 # async def refund_ends(message: Message, state: FSMContext):
