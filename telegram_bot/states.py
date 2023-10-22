@@ -14,10 +14,13 @@ class AdminStates(StatesGroup):
     enter_count_of_event_prime = State()
     enter_count_of_event_normal = State()
     saving_or_editing_from_the_beginning = State()
-    ticket_refund = State()
+
     upload_data = State()
     upload_data_in_format = State()
     upload_data_in_format_final = State()
+
+    ticket_refund = State()
+    choose_event_to_refund = State()
 
 
 class PromouterStates(StatesGroup):

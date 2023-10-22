@@ -133,9 +133,15 @@ async def get_ticket_by_number(ticket_number):
     endpoint = f'get_ticket/{ticket_number}/'
     return await get_from_api(endpoint)
 
+
 async def delete_ticket(ticket_number):
     endpoint = f'tickets/{ticket_number}/'
     return await send_to_api(endpoint, None)
+
+
+async def get_event(name):
+    endpoint = f'event/{name}/'
+    return await get_from_api(endpoint)
 
 
 

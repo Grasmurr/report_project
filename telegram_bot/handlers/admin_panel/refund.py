@@ -20,15 +20,27 @@ from telegram_bot.states import AdminStates
 
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
+from telegram_bot.repository import api_methods
+
 
 @dp.message(AdminStates.main, F.text == 'Оформить возврат')
-async def choose_event_for_ticket_refund (message: Message, state: FSMContext):
-    markup = chat_backends.create_keyboard_buttons('Все счастливы', 'Все несчастны', 'Назад')
-    await state.set_state(AdminStates.ticket_refund)
+async def ticket_refund_start(message: Message, state: FSMContext):
+    events = await api_methods.get_all_events()
+    event_names = [event['name'] for event in events['data']]
+    markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
+    await state.set_state(AdminStates.choose_event_to_refund)
     await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
                          reply_markup=markup)
 
-# TODO: здесь должен быть код для возвратов
+
+@dp.message(AdminStates.choose_event_to_refund)
+async def choose_event_for_ticket_refund(message: Message, state: FSMContext):
+    ans = message.text
+    if ans == 'Назад':
+        await admin_menu(message)
+    else:
+        await message.answer('Хорошо! Выберите тип билета, который вы хотите вернуть:')
+
 
 
 @dp.message(AdminStates.ticket_refund, F.text == 'Назад')

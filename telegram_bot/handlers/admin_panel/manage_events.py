@@ -102,7 +102,6 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
         data = await state.get_data()
         for i in data:
             print(f'{i}: {data[i]}')
-        # TODO: Эти данные у нас дальше будут ехать в базу, создавая там билеты
         print(data)
         await create_event(data['name'], data['nm_prime'], data['nm_usual'])
         events = await get_all_events()

@@ -12,7 +12,6 @@ from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_
 from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
-from myapi.myapp.models import Event
 from django.http import HttpResponse, JsonResponse
 import re
 
@@ -152,7 +151,7 @@ async def confirm_participant(message: Message, state: FSMContext):
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
-    event = get_event_by_name(data['participant_event'])
+    event = await api_methods.get_event(data['participant_event'])
 
     await api_methods.create_ticket(Event=event,
                                     ticket_number=150,
