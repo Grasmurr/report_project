@@ -42,18 +42,18 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
                               'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
-def check_participant_data(name, phone_number, birth_date, course, ticket_price):
+def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
     # Проверка имени и фамилии
-    name_pattern = r"^[A-Za-zА-Яа-яЁё]+\s[A-Za-zА-Яа-яЁё]+$"
-    if not re.match(name_pattern, name):
+    if not name.isalpha():
         return False
 
-    # Проверка номера телефона
-    phone_pattern = r"^\+?[0-9\s()-]+$"
-    if not re.match(phone_pattern, phone_number):
+    if not surname.isalpha():
         return False
 
-    # Проверка даты рождения
+    phone_number = ''.join([i for i in phone_number if i.isdigit()])
+    if not phone_number.isdigit() or len(phone_number) != 11:
+        return False
+
     date_pattern = r"^\d{2}:\d{2}:\d{4}$"
     if not re.match(date_pattern, birth_date):
         return False
@@ -62,7 +62,6 @@ def check_participant_data(name, phone_number, birth_date, course, ticket_price)
     if not course.isdigit():
         return False
 
-    # Проверка цены билета
     if not ticket_price.isdigit() or int(ticket_price) > 10000:
         return False
 
@@ -74,6 +73,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
+    print(data_blocks)
     participant_name = data_blocks[0].split()[0]
     participant_surname = data_blocks[0].split()[1]
     participant_number = data_blocks[1]
@@ -84,7 +84,12 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
 
     # Проверка данных участника
-    if not check_participant_data(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price):
+    if not check_participant_data(name=participant_name,
+                                  surname=participant_surname,
+                                  phone_number=participant_number,
+                                  birth_date=participant_date_of_birth,
+                                  course=participant_course,
+                                  ticket_price=participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
 
@@ -152,6 +157,14 @@ async def confirm_participant(message: Message, state: FSMContext):
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
     event = await api_methods.get_event(data['participant_event'])
+
+    print(event, data['participant_name'],
+                                    data['participant_surname'],
+                                    data['ticket_type'],
+                                    data['participant_date_of_birth'],
+                                    data['participant_ticket_price'],
+                                    data['participant_ep'],
+                                    data['participant_course'])
 
     await api_methods.create_ticket(Event=event,
                                     ticket_number=150,
