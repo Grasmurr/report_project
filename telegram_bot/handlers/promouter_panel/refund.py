@@ -80,12 +80,12 @@ async def refund_ends(message: Message, state: FSMContext):
     data = await state.get_data()
     ticket_number_for_refund = data['ticket_number_for_refund']
 
-    ticket = await get_ticket_by_number(ticket_number_for_refund)
-    if not ticket:
-        await message.answer(text='Извините, билет с таким номером не найден. Попробуйте еще раз.', reply_markup = 'Назад')
-        return
+    # ticket = await get_ticket_by_number(ticket_number_for_refund)
+    # if not ticket:
+    #     await message.answer(text='Извините, билет с таким номером не найден. Попробуйте еще раз.', reply_markup = 'Назад')
+    #     return
 
-    await delete_ticket(ticket_number_for_refund)
+    # await delete_ticket(ticket_number_for_refund)
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Возврат билета оформлен', reply_markup=markup)

@@ -10,6 +10,8 @@ from rest_framework.response import Response
 
 import json
 from .models import Promouter, Event, Ticket
+from .serializers import EventSerializer
+
 
 import csv
 from openpyxl import Workbook
@@ -69,6 +71,16 @@ class EventView(View):
             return JsonResponse({'data': list(events)}, safe=False)
 
 
+class EventAPIView(APIView):
+
+    def get(self, request, name=None):
+        if name:
+            event = get_object_or_404(Event, name=name)
+            serializer = EventSerializer(event)
+            return Response(serializer.data)
+        return Response({'error': 'Name parameter is required'}, status=400)
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketView(View):
     def post(self, request):
@@ -97,6 +109,7 @@ class TicketDeleteView(APIView):
             return Response({'message': 'Ticket deleted successfully'})
         else:
             return Response({'message': 'Ticket number is required'})
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketExportCsv(View):
