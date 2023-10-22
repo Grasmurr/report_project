@@ -148,7 +148,7 @@ ticket_data = await get_ticket_by_number(ticket_number)
 ############################################################################################################
 
 async def update_promouter(user_id, username=None, full_name=None, phone_number=None):
-    endpoint = f'update_promouter/{user_id}/'
+    endpoint = f'promouter/{user_id}/'
     data = {
         'user_id': user_id,
         'username': username,
