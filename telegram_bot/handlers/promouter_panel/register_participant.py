@@ -169,7 +169,7 @@ async def registration_ends(message: Message, state: FSMContext):
     #                                 data['participant_course'])
 
     await api_methods.create_ticket(event=data['participant_event'],
-                                    ticket_number=150,
+                                    ticket_number=151,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],
                                     ticket_type=data['ticket_type'],

@@ -103,12 +103,13 @@ class TicketView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketDeleteView(APIView):
     def delete(self, request, ticket_number=None):
-        if ticket_number:
-            ticket = get_object_or_404(Ticket, ticket_number=ticket_number)
-            ticket.delete()
-            return Response({'message': 'Ticket deleted successfully'})
-        else:
-            return Response({'message': 'Ticket number is required'})
+        try:
+            ticket = Ticket.objects.get(ticket_number=ticket_number)
+        except Ticket.DoesNotExist:
+            return JsonResponse({'error': 'Ticket not found'}, status=404)
+
+        ticket.delete()
+        return JsonResponse({'status': 'ok'}, status=200)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

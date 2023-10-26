@@ -3,7 +3,6 @@ import json
 import csv
 
 
-
 ############################################################################################################
 ##                                                                                                        ##
 ##                                          POST METHODS                                                  ##
@@ -71,7 +70,6 @@ async def create_ticket(event, ticket_number, name, surname, ticket_type, date_o
     }
     return await send_to_api(endpoint, data)
 
-
 '''
 Пример использования:
 user_id = 12345
@@ -133,16 +131,9 @@ async def get_ticket_by_number(ticket_number):
     return await get_from_api(endpoint)
 
 
-async def delete_ticket(ticket_number):
-    endpoint = f'tickets/{ticket_number}/'
-    return await send_to_api(endpoint, None)
-
-
 async def get_event(name):
     endpoint = f'event/{name}/'
     return await get_from_api(endpoint)
-
-
 
 
 '''
@@ -157,6 +148,7 @@ ticket_data = await get_ticket_by_number(ticket_number)
 ##                                                                                                        ##
 ############################################################################################################
 
+
 async def update_promouter(user_id, username=None, full_name=None, phone_number=None):
     endpoint = f'promouter/{user_id}/'
     data = {
@@ -170,6 +162,19 @@ async def update_promouter(user_id, username=None, full_name=None, phone_number=
     return await send_to_api(endpoint, data)
 
 
+############################################################################################################
+##                                                                                                        ##
+##                                          DELETE METHODS                                                ##
+##                                                                                                        ##
+############################################################################################################
+
+
 async def delete_promouter(user_id):
     endpoint = f'promouter/{user_id}/'
     return await send_to_api(endpoint, method='DELETE')
+
+
+async def delete_ticket(ticket_number):
+    endpoint = f'ticket_delete/{ticket_number}/'
+    return await send_to_api(endpoint, method='DELETE')
+
