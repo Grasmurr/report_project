@@ -1,3 +1,5 @@
+import random, re, tempfile, os
+
 from telegram_bot.loader import dp, bot
 from aiogram.types import \
     (Message,
@@ -6,14 +8,16 @@ from aiogram.types import \
 from telegram_bot.helpers import chat_backends
 from aiogram import F
 from aiogram.fsm.context import FSMContext
-from telegram_bot.states import PromouterStates
+from aiogram.types.input_file import BufferedInputFile
 
+from telegram_bot.states import PromouterStates
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
 from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
-from django.http import HttpResponse, JsonResponse
-import re
+
+from PIL import Image, ImageFont, ImageDraw
+
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
@@ -155,6 +159,24 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.set_state(PromouterStates.confirm_participant)
 
 
+
+
+async def create_image(text):
+    with open('/usr/src/telegram_bot/handlers/promouter_panel/assets/ticket.jpg', 'rb') as file:
+        image = Image.open(file).copy()
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("/usr/src/telegram_bot/handlers/promouter_panel/assets/arial.ttf", 200)
+    position = (500, 700)
+    color = "black"
+    draw.text(position, str(text), color, font=font)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    image.save(temp_file, format='JPEG')
+    temp_file_path = temp_file.name
+    temp_file.close()
+    return temp_file_path
+
+
+
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
@@ -168,8 +190,16 @@ async def registration_ends(message: Message, state: FSMContext):
     #                                 data['participant_ep'],
     #                                 data['participant_course'])
 
+    num = random.randint(100, 10000)
+
+    temp_file_path = await create_image(num)
+
+    with open(temp_file_path, 'rb') as file:
+        await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
+    os.remove(temp_file_path)
+
     await api_methods.create_ticket(event=data['participant_event'],
-                                    ticket_number=151,
+                                    ticket_number=num,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],
                                     ticket_type=data['ticket_type'],
