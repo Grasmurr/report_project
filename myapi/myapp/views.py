@@ -12,7 +12,6 @@ import json
 from .models import Promouter, Event, Ticket
 from .serializers import EventSerializer
 
-
 import csv
 from openpyxl import Workbook
 from django.http import HttpResponse
@@ -111,7 +110,6 @@ class TicketDeleteView(APIView):
         ticket.delete()
         return JsonResponse({'status': 'ok'}, status=200)
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketExportCsv(View):
     def get(self, request, event_name):
@@ -119,7 +117,8 @@ class TicketExportCsv(View):
         response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program'])
+        writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth',
+                         'Price', 'Educational Program'])
 
         tickets = Ticket.objects.filter(event_name=event_name)
         for ticket in tickets:

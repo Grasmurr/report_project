@@ -19,5 +19,5 @@ urlpatterns = [
     path('tickets/<int:ticket_type>/', views.TicketView.as_view(), name='get_tickets_by_type'),
     path('ticket_delete/<int:ticket_number>/', views.TicketDeleteView.as_view(), name='delete_ticket'),
 
-    path('export-tickets/<int:event_id>/', views.TicketExportCsv.as_view(), name='export_tickets_csv')
+    path('export-tickets/<int:умуте_шв>/', views.TicketExportCsv.as_view(), name='export_tickets_csv')
 ]

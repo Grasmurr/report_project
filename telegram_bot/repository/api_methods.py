@@ -135,6 +135,11 @@ async def get_event(name):
     endpoint = f'event/{name}/'
     return await get_from_api(endpoint)
 
+async def get_tickets_by_event(event_name):
+    all_tickets = await get_all_tickets()
+    return [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
+
+
 
 '''
 Пример использования:
