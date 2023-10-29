@@ -21,6 +21,8 @@ from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 from telegram_bot.repository.api_methods import get_all_events, get_all_tickets
 
 import csv
+import pandas as pd
+
 
 import openpyxl
 from io import BytesIO
@@ -63,64 +65,100 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
 async def back_from_choosing_event_for_uploading_data(message: Message, state: FSMContext):
     await choose_event_for_uploading_data(message, state)
 
-@dp.message(AdminStates.upload_data_in_format, F.text == '.xlsx' or  F.text == '.csv')
-async def export_event_data(message: Message, state: FSMContext):
+def filter_data_by_event(data, event):
+    filtered_data = [item for item in data["data"] if item["event"] == event]
+    if len(filtered_data) == 0:
+        return "Для этого мероприятия нет билетов."
+    return filtered_data
+def convert_data_to_file(data, event, file_format):
+    filtered_data = filter_data_by_event(data, event)
 
-
-    data = await state.get_data()
-    event_name = data['event_name']
-    export_format = message.text
-
-    all_tickets = await get_all_tickets()
-    tickets = [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
-    if not tickets:
-        await message.answer("Для этого мероприятия нет билетов.")
+    if isinstance(filtered_data, str):
+        print(filtered_data)
         return
 
-    markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Вернуться в меню админа')
+    if file_format == ".csv":
+        filename = f"{event}.csv"
+        with open(filename, "w", newline="") as csvfile:
+            fieldnames = filtered_data[0].keys()
+            fieldnames_russian = {
+                "id": "ID",
+                "event": "Мероприятие",
+                "ticket_number": "Номер билета",
+                "ticket_holder_name": "Имя",
+                "ticket_holder_surname": "Фамилия",
+                "ticket_type": "Тип билета",
+                "date_of_birth": "Дата рождения",
+                "price": "Цена",
+                "educational_program": "Образовательная программа",
+                "educational_course": "Курс"
+            }
+            writer = csv.DictWriter(csvfile, fieldnames=[fieldnames_russian[field] for field in fieldnames])
+            writer.writeheader()
+            writer.writerows(
+                [{fieldnames_russian[field]: item[field] for field in fieldnames} for item in filtered_data])
+    elif file_format == ".xlsx":
+        filename = f"{event}.xlsx"
+        df = pd.DataFrame(filtered_data)
+        df = df.rename(columns={
+            "id": "ID",
+            "event": "Мероприятие",
+            "ticket_number": "Номер билета",
+            "ticket_holder_name": "Имя",
+            "ticket_holder_surname": "Фамилия",
+            "ticket_type": "Тип билета",
+            "date_of_birth": "Дата рождения",
+            "price": "Цена",
+            "educational_program": "Образовательная программа",
+            "educational_course": "Курс"
+        })
+        df.to_excel(filename, index=False)
+    else:
+        print("Неподдерживаемый формат файла")
 
-    if export_format == '.csv':
-        csv_data = []
-        for ticket in tickets:
-            csv_data.append([ticket['ticket_number'], ticket['ticket_holder_name'],
-                             ticket['ticket_holder_surname'], ticket['ticket_type']])
+# @dp.message(AdminStates.upload_data_in_format, F.text == '.xlsx' or  F.text == '.csv')
+# async def export_event_data(message: Message, state: FSMContext):
+#     data = await state.get_data()
+#     event = data['event_name']
+#     file_format = message.text
+#
+#     tickets_data = await get_all_tickets()
+#
+#     convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
+#
+#     tickets = [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
+#     if not tickets:
+#         await message.answer("Для этого мероприятия нет билетов.")
+#         return
+#
+#     markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Вернуться в меню админа')
+#
+#
+#
+#     await state.set_state(AdminStates.upload_data_in_format_final)
 
-        csv_buffer = BytesIO()
-        writer = csv.writer(csv_buffer, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(['Номер билета', 'Имя', 'Фамилия', 'Тип билета'])
-        writer.writerows(csv_data)
-        csv_buffer.seek(0)
+@dp.message(AdminStates.upload_data_in_format, F.text.in_(['.xlsx', '.csv']))
+async def export_event_data(message: Message, state: FSMContext):
 
-        with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as temp_file:
-            temp_file.write(csv_buffer.getvalue())
-            temp_file_path = temp_file.name
+    data = await state.get_data()
+    event = data['event_name']
+    file_format = message.text
 
-        await message.answer_document(temp_file_path,
-                                      caption=f"Вот файл с данными о билетах на мероприятие {hcode(event_name)}"
-                                              f" в формате.csv", reply_markup=markup)
+    tickets_data = await get_all_tickets()
 
-    elif export_format == '.xlsx':
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.append(['Номер билета', 'Имя', 'Фамилия', 'Тип билета'])
+    filename = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
 
-        for ticket in tickets:
-            worksheet.append([ticket['ticket_number'], ticket['ticket_holder_name'],
-                              ticket['ticket_holder_surname'], ticket['ticket_type']])
+    if isinstance(filename, str):
+        markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие', 'Вернуться в меню админа')
+        await message.answer(filename, markup=markup)
+        return
 
-        xlsx_buffer = BytesIO()
-        workbook.save(xlsx_buffer)
-        xlsx_buffer.seek(0)
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as temp_file:
-            temp_file.write(xlsx_buffer.getvalue())
-            temp_file_path = temp_file.name
+    with open(filename, 'rb') as file:
+        markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Выбрать другое мероприятие', 'Вернуться в меню админа')
+        await message.answer_document(file)
+        await message.answer(text=f'Вот ваш файл в формате {file_format}', markup=markup)
 
-        await message.answer_document(temp_file_path,
-                                      caption=f"Вот файл с данными о билетах на мероприятие {hcode(event_name)} "
-                                              f"в формате .xlsx", reply_markup=markup)
-
-    await state.set_statу(AdminStates.upload_data_in_format_final)
-
+    await state.set_state(AdminStates.upload_data_in_format_final)
 
 @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
 async def upload_data_in_another_format(message: Message, state: FSMContext):

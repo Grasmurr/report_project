@@ -120,36 +120,36 @@ class TicketDeleteView(APIView):
         return JsonResponse({'status': 'ok'}, status=200)
 
 
-class ExportTicketsView(APIView):
-    def get(self, request, format='.xlsx', event='SKYNET'):
-
-
-        tickets = Ticket.objects.filter(event=event)
-
-        if format == '.csv':
-            response = JsonResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
-
-            writer = csv.writer(response)
-            writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
-
-            for ticket in tickets:
-                writer.writerow([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
-
-            return response
-
-        elif format == '.xlsx':
-            response = JsonResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = 'attachment; filename="tickets.xlsx"'
-
-            workbook = openpyxl.Workbook()
-            worksheet = workbook.active
-
-            worksheet.append(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
-
-            for ticket in tickets:
-                worksheet.append([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
-
-            workbook.save(response)
-
-            return response
+# class ExportTicketsView(APIView):
+#     def get(self, request, format='.xlsx', event='SKYNET'):
+#
+#
+#         tickets = Ticket.objects.filter(event=event)
+#
+#         if format == '.csv':
+#             response = JsonResponse(content_type='text/csv')
+#             response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
+#
+#             writer = csv.writer(response)
+#             writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
+#
+#             for ticket in tickets:
+#                 writer.writerow([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
+#
+#             return response
+#
+#         elif format == '.xlsx':
+#             response = JsonResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#             response['Content-Disposition'] = 'attachment; filename="tickets.xlsx"'
+#
+#             workbook = openpyxl.Workbook()
+#             worksheet = workbook.active
+#
+#             worksheet.append(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
+#
+#             for ticket in tickets:
+#                 worksheet.append([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
+#
+#             workbook.save(response)
+#
+#             return response
