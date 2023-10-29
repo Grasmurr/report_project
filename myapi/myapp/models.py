@@ -3,8 +3,8 @@ from django.db import models
 
 class Event(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    nm_prime = models.CharField(max_length=255)
-    nm_usual = models.CharField(max_length=255)
+    nm_prime = models.IntegerField(null=False)
+    nm_usual = models.IntegerField(null=False)
     date_of_event = models.DateField(default='2023-11-11')
 
 
