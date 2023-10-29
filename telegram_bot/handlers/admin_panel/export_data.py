@@ -63,10 +63,8 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
 async def back_from_choosing_event_for_uploading_data(message: Message, state: FSMContext):
     await choose_event_for_uploading_data(message, state)
 
-@dp.message(AdminStates.upload_data_in_format, F.text == '.xlsx' or  F.text == '.csv')
+@dp.message(AdminStates.upload_data_in_format, F.text.in_(['.xlsx', '.csv']))
 async def export_event_data(message: Message, state: FSMContext):
-
-
     data = await state.get_data()
     event_name = data['event_name']
     export_format = message.text
@@ -119,7 +117,7 @@ async def export_event_data(message: Message, state: FSMContext):
                                       caption=f"Вот файл с данными о билетах на мероприятие {hcode(event_name)} "
                                               f"в формате .xlsx", reply_markup=markup)
 
-    await state.set_statу(AdminStates.upload_data_in_format_final)
+    await state.set_state(AdminStates.upload_data_in_format_final)
 
 
 @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')

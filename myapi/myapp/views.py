@@ -16,6 +16,8 @@ import csv
 from openpyxl import Workbook
 from django.http import HttpResponse
 from django.shortcuts import render
+import openpyxl
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -110,18 +112,38 @@ class TicketDeleteView(APIView):
         ticket.delete()
         return JsonResponse({'status': 'ok'}, status=200)
 
-@method_decorator(csrf_exempt, name='dispatch')
-class TicketExportCsv(View):
-    def get(self, request, event_name):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
 
-        writer = csv.writer(response)
-        writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth',
-                         'Price', 'Educational Program'])
+class ExportTicketsView(APIView):
+    def post(self, request):
+        event = request.data.get('event')
+        format = request.data.get('format')
 
-        tickets = Ticket.objects.filter(event_name=event_name)
-        for ticket in tickets:
-            writer.writerow([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program])
+        tickets = Ticket.objects.filter(event=event)
 
-        return response
+        if format == '.csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
+
+            writer = csv.writer(response)
+            writer.writerow(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
+
+            for ticket in tickets:
+                writer.writerow([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
+
+            return response
+
+        elif format == '.xlsx':
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="tickets.xlsx"'
+
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+
+            worksheet.append(['Ticket Number', 'Ticket Holder Name', 'Ticket Holder Surname', 'Ticket Type', 'Date of Birth', 'Price', 'Educational Program', 'Educational Course'])
+
+            for ticket in tickets:
+                worksheet.append([ticket.ticket_number, ticket.ticket_holder_name, ticket.ticket_holder_surname, ticket.ticket_type, ticket.date_of_birth, ticket.price, ticket.educational_program, ticket.educational_course])
+
+            workbook.save(response)
+
+            return response
