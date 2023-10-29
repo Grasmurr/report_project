@@ -114,7 +114,7 @@ class TicketDeleteView(APIView):
 
 
 class ExportTicketsView(APIView):
-    def post(self, request):
+    def get(self, request):
         event = request.data.get('event')
         format = request.data.get('format')
 
