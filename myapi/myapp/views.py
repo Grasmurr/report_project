@@ -90,15 +90,22 @@ class TicketView(View):
         return JsonResponse({'status': 'ok'}, status=201)
 
     def get(self, request, ticket_number=None, ticket_type=None):
+        event = request.GET.get('event')
+        if not event:
+            return JsonResponse({'error': 'Event parameter is required'}, status=400)
+
+        ticket_type = request.GET.get('ticket_type')
+        ticket_number = request.GET.get('ticket_number')
+
+        filters = {'event': event}
+
+        if ticket_type:
+            filters['ticket_type'] = ticket_type
         if ticket_number:
-            ticket = Ticket.objects.filter(ticket_number=ticket_number).values()
-            return JsonResponse({'data': list(ticket)}, safe=False)
-        elif ticket_type:
-            tickets = Ticket.objects.filter(type=ticket_type).values()
-            return JsonResponse({'data': list(tickets)}, safe=False)
-        else:
-            tickets = Ticket.objects.all().values()
-            return JsonResponse({'data': list(tickets)}, safe=False)
+            filters['ticket_number'] = ticket_number
+
+        tickets = Ticket.objects.filter(**filters).values()
+        return JsonResponse({'data': list(tickets)}, safe=False)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -114,14 +121,13 @@ class TicketDeleteView(APIView):
 
 
 class ExportTicketsView(APIView):
-    def get(self, request):
-        event = request.data.get('event')
-        format = request.data.get('format')
+    def get(self, request, format='.xlsx', event='SKYNET'):
+
 
         tickets = Ticket.objects.filter(event=event)
 
         if format == '.csv':
-            response = HttpResponse(content_type='text/csv')
+            response = JsonResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="tickets.csv"'
 
             writer = csv.writer(response)
@@ -133,7 +139,7 @@ class ExportTicketsView(APIView):
             return response
 
         elif format == '.xlsx':
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response = JsonResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = 'attachment; filename="tickets.xlsx"'
 
             workbook = openpyxl.Workbook()

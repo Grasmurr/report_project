@@ -13,7 +13,6 @@ from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository.api_methods import delete_ticket, get_ticket_by_number
 
 
-
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Оформить возврат")
 async def choose_event_for_refund(message: Message, state: FSMContext):
     events = await get_all_events()

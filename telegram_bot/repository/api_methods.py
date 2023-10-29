@@ -116,9 +116,16 @@ async def get_all_tickets():
     return await get_from_api(endpoint)
 
 
-async def get_tickets_by_type(ticket_type):
-    endpoint = f'tickets/{ticket_type}/'
-    return await get_from_api(endpoint)
+async def get_tickets_by_type(event, ticket_type):
+    endpoint = 'tickets/'
+    params = {'ticket_type': ticket_type, 'event': event}
+    return await get_from_api(endpoint, params=params)
+
+
+async def get_ticket_by_number(event, ticket_number):
+    endpoint = 'tickets/'
+    params = {'ticket_number': ticket_number, 'event': event}
+    return await get_from_api(endpoint, params=params)
 
 
 async def get_event_by_name(name):
@@ -126,14 +133,10 @@ async def get_event_by_name(name):
     return await get_from_api(endpoint)
 
 
-async def get_ticket_by_number(ticket_number):
-    endpoint = f'get_ticket/{ticket_number}/'
-    return await get_from_api(endpoint)
-
-
 async def get_event(name):
     endpoint = f'event/{name}/'
     return await get_from_api(endpoint)
+
 
 async def get_tickets_by_event(event_name):
     all_tickets = await get_all_tickets()

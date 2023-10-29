@@ -176,19 +176,9 @@ async def create_image(text):
     return temp_file_path
 
 
-
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
-    # event = await api_methods.get_event(data['participant_event'])
-    #
-    # print(event, data['participant_name'],
-    #                                 data['participant_surname'],
-    #                                 data['ticket_type'],
-    #                                 data['participant_date_of_birth'],
-    #                                 data['participant_ticket_price'],
-    #                                 data['participant_ep'],
-    #                                 data['participant_course'])
 
     num = random.randint(100, 10000)
 
@@ -212,14 +202,6 @@ async def registration_ends(message: Message, state: FSMContext):
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
-
-
-# def get_event_by_name(name):
-#     try:
-#         event = Event.objects.get(name=name)
-#     except Event.DoesNotExist:
-#         return JsonResponse({'error': 'Event not found'}, status=404)
-#     return event
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
