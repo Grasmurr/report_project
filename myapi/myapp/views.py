@@ -19,7 +19,6 @@ from django.shortcuts import render
 import openpyxl
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class PromouterView(View):
     def post(self, request):
@@ -34,6 +33,7 @@ class PromouterView(View):
         else:
             promouters = Promouter.objects.all().values()
             return JsonResponse({'data': list(promouters)}, safe=False)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PromouterUpdateView(View):

@@ -11,6 +11,8 @@ from telegram_bot.states import AdminStates
 from telegram_bot.repository.api_methods import create_event, get_all_events
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
+import datetime
+
 
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
 async def manage_events(message: Message, state: FSMContext):
@@ -77,18 +79,33 @@ async def create_count_of_prime_tickets(message: Message, state: FSMContext):
 async def create_count_of_normal_tickets (message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_normal_tickets = int(message.text)
-        markup = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
         data = await state.get_data()
         count_of_prime_tickets = data['nm_prime']
         name_of_event = data['name']
         await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов, '
                              f'а также {count_of_normal_tickets} обычных билетов для мероприятия «{name_of_event}». '
-                             f'\n\nЕсли вы передумали, вы можете ввести данные заново',
-                             reply_markup=markup)
+                             f'\n\nПожалуйста, введите дату в '
+                             f'формате YYYY-MM-DD. Например: 2023-10-29')
         await state.update_data(nm_usual=count_of_normal_tickets)
-        await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+        await state.set_state(AdminStates.enter_event_date)
     else:
         await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+
+
+@dp.message(AdminStates.enter_event_date)
+async def create_event_date(message: Message, state: FSMContext):
+    try:
+        event_date = datetime.datetime.strptime(message.text, '%Y-%m-%d').date()
+        event_date_str = event_date.strftime('%Y-%m-%d')
+        await state.update_data(event_date=event_date_str)
+        markup = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
+        await message.answer(f'Дата мероприятия установлена на {event_date_str}. Если это верно, нажмите "Продолжить".',
+                             reply_markup=markup)
+        await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+
+    except ValueError:
+        await message.answer('Пожалуйста, введите дату в формате YYYY-MM-DD. Например: 2023-10-29')
+
 
 
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
@@ -103,7 +120,7 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
         for i in data:
             print(f'{i}: {data[i]}')
         print(data)
-        await create_event(data['name'], data['nm_prime'], data['nm_usual'])
+        await create_event(data['name'], data['nm_prime'], data['nm_usual'], data['event_date'])
         events = await get_all_events()
         await message.answer(text=f'Вы успешно создали мероприятие: {events}')
         await state.set_state(AdminStates.main)

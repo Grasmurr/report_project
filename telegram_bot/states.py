@@ -12,6 +12,7 @@ class AdminStates(StatesGroup):
     delete_event = State()
     confirm_event_name = State()
     enter_count_of_event_prime = State()
+    enter_event_date = State()
     enter_count_of_event_normal = State()
     saving_or_editing_from_the_beginning = State()
 
@@ -21,6 +22,7 @@ class AdminStates(StatesGroup):
 
     ticket_refund = State()
     choose_event_to_refund = State()
+
 
 
 class PromouterStates(StatesGroup):
