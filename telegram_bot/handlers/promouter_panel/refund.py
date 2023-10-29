@@ -10,7 +10,7 @@ from telegram_bot.states import PromouterStates
 
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
 from telegram_bot.repository.api_methods import get_all_events
-from telegram_bot.repository.api_methods import delete_ticket, get_ticket_by_number
+from telegram_bot.repository.api_methods import delete_ticket
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Оформить возврат")
