@@ -15,24 +15,30 @@ from aiogram.enums.content_type import ContentType
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import BufferedInputFile
+from aiogram.types import InputFile
+
 from telegram_bot.states import AdminStates
+
 
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 from telegram_bot.repository.api_methods import get_all_events, get_ticket_by_number_or_type
 
 import csv
 import pandas as pd
+import io
 
 
 import openpyxl
 from io import BytesIO
 from aiogram.types import Message
 from aiogram.utils.markdown import hcode
+import tempfile
 
 from . import dp
 from telegram_bot.helpers import chat_backends
 from telegram_bot.states import AdminStates
-import tempfile
+
+
 
 
 
@@ -70,13 +76,15 @@ def filter_data_by_event(data, event):
     if len(filtered_data) == 0:
         return "Для этого мероприятия нет билетов."
     return filtered_data
+
 def convert_data_to_file(data, event, file_format):
     print (data)
     filtered_data = filter_data_by_event(data, event)
 
     if isinstance(filtered_data, str):
         print(filtered_data)
-        return
+        filename = filtered_data
+        return filename
 
     if file_format == ".csv":
         filename = f"{event}.csv"
@@ -117,26 +125,11 @@ def convert_data_to_file(data, event, file_format):
     else:
         print("Неподдерживаемый формат файла")
 
-# @dp.message(AdminStates.upload_data_in_format, F.text == '.xlsx' or  F.text == '.csv')
-# async def export_event_data(message: Message, state: FSMContext):
-#     data = await state.get_data()
-#     event = data['event_name']
-#     file_format = message.text
-#
-#     tickets_data = await get_all_tickets()
-#
-#     convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
-#
-#     tickets = [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
-#     if not tickets:
-#         await message.answer("Для этого мероприятия нет билетов.")
-#         return
-#
-#     markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Вернуться в меню админа')
-#
-#
-#
-#     await state.set_state(AdminStates.upload_data_in_format_final)
+    # Open the file and return the file object
+    with open(filename, 'rb') as file:
+        file_obj = io.BytesIO(file.read())
+
+    return filename, file_obj
 
 @dp.message(AdminStates.upload_data_in_format, F.text.in_(['.xlsx', '.csv']))
 async def export_event_data(message: Message, state: FSMContext):
@@ -146,21 +139,30 @@ async def export_event_data(message: Message, state: FSMContext):
     file_format = message.text
 
     tickets_data = await get_ticket_by_number_or_type(event=event)
-    print (tickets_data)
 
-    filename = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
+    filename, file_obj = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
 
-    if isinstance(filename, str):
-        markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие', 'Вернуться в меню админа')
-        await message.answer(filename, markup=markup)
-        return
+    # if isinstance(file_obj, str):
+    #     markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие', 'Вернуться в меню админа')
+    #     await message.answer(file_obj, markup=markup)
+    #     return
+
+
+    markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Выбрать другое мероприятие',
+                                                   'Вернуться в меню админа')
 
     with open(filename, 'rb') as file:
-        markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Выбрать другое мероприятие', 'Вернуться в меню админа')
-        await message.answer_document(file)
-        await message.answer(text=f'Вот ваш файл в формате {file_format}', markup=markup)
+        file_obj = io.BytesIO(file.read())
+    # TODO: сделать как-то так чтобы формат файла отправлялся
+    await  message.answer_document(chat_id=message.from_user.id, document=file_obj, caption=f'Вот ваш файл в формате {file_format}',
+                            reply_markup=markup)
+
 
     await state.set_state(AdminStates.upload_data_in_format_final)
+
+
+
+
 
 @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
 async def upload_data_in_another_format(message: Message, state: FSMContext):
