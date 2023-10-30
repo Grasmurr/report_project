@@ -18,7 +18,7 @@ from aiogram.types.input_file import BufferedInputFile
 from telegram_bot.states import AdminStates
 
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
-from telegram_bot.repository.api_methods import get_all_events, get_all_tickets
+from telegram_bot.repository.api_methods import get_all_events, get_ticket_by_number_or_type
 
 import csv
 import pandas as pd
@@ -72,6 +72,7 @@ def filter_data_by_event(data, event):
         return "Для этого мероприятия нет билетов."
     return filtered_data
 def convert_data_to_file(data, event, file_format):
+    print (data)
     filtered_data = filter_data_by_event(data, event)
 
     if isinstance(filtered_data, str):
@@ -145,7 +146,7 @@ async def export_event_data(message: Message, state: FSMContext):
     event = data['event_name']
     file_format = message.text
 
-    tickets_data = await get_all_tickets(event=event)
+    tickets_data = await get_ticket_by_number_or_type(event=event)
     print (tickets_data)
 
     filename = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)

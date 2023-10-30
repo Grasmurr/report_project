@@ -112,9 +112,9 @@ async def get_all_events():
     return await get_from_api(endpoint)
 
 
-async def get_all_tickets(event=None):
-    endpoint = 'tickets/'
-    return await get_from_api(endpoint)
+# async def get_all_tickets(event=None):
+#     endpoint = 'tickets/'
+#     return await get_from_api(endpoint)
 
 
 async def get_ticket_by_number_or_type(event, ticket_number=None, ticket_type=None):
