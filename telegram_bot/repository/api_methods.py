@@ -55,7 +55,8 @@ async def create_event(name, nm_prime, nm_usual, event_date):
     return await send_to_api(endpoint, data)
 
 
-async def create_ticket(event, ticket_number, name, surname, ticket_type, date_of_birth, price, educational_program, educational_course):
+async def create_ticket(event, ticket_number, name, surname, ticket_type, date_of_birth, price, educational_program,
+                        educational_course):
     endpoint = 'ticket/'
 
     data = {
@@ -119,7 +120,11 @@ async def get_all_events():
 
 async def get_ticket_by_number_or_type(event, ticket_number=None, ticket_type=None):
     endpoint = 'tickets/'
-    params = {'ticket_number': ticket_number, 'event': event, 'ticket_type': ticket_type}
+    params = {'event': event}
+    if ticket_number:
+        params['ticket_number'] = ticket_number
+    if ticket_type:
+        params['ticket_type'] = ticket_type
     return await get_from_api(endpoint, params=params)
 
 
@@ -133,9 +138,9 @@ async def get_event(name):
     return await get_from_api(endpoint)
 
 
-async def get_tickets_by_event(event_name):
-    all_tickets = await get_all_tickets()
-    return [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
+# async def get_tickets_by_event(event_name):
+#     all_tickets = await get_all_tickets()
+#     return [ticket for ticket in all_tickets['data'] if ticket['event'] == event_name]
 
 
 

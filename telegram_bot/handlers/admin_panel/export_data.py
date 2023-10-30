@@ -32,7 +32,6 @@ from aiogram.utils.markdown import hcode
 from . import dp
 from telegram_bot.helpers import chat_backends
 from telegram_bot.states import AdminStates
-from telegram_bot.repository.api_methods import get_tickets_by_event
 import tempfile
 
 
