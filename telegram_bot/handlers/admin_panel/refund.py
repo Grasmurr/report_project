@@ -39,6 +39,8 @@ async def ticket_refund_start(message: Message, state: FSMContext):
 #         await admin_menu(message)
 #     else:
 #         await message.answer('Хорошо! Выберите тип билета, который вы хотите вернуть:')
+
+
 @dp.message(AdminStates.choose_event_to_refund)
 async def ticket_refund_start(message: Message, state: FSMContext):
     events = await api_methods.get_all_events()
@@ -47,10 +49,6 @@ async def ticket_refund_start(message: Message, state: FSMContext):
     await state.set_state(AdminStates.choose_event_to_refund)
     await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
                          reply_markup=markup)
-
-
-
-
 
 
 @dp.message(AdminStates.ticket_refund, F.text == 'Назад')

@@ -107,15 +107,10 @@ async def refund_confirmation(message: Message, state: FSMContext):
         #                               f"Пожалуйста, обратитесь к администратору (@URL) для уточнения причины.",
         #                          reply_markup=markup)
 
-
-
         # ticket = await get_ticket_by_number(ticket_number_for_refund)
     # if not ticket:
     #     await message.answer(text='Извините, билет с таким номером не найден. Попробуйте еще раз.', reply_markup = 'Назад')
     #     return
-
-
-
 
 
 # @dp.message(PromouterStates.confirm_ticket_data_for_refund, F.text == "Подтвердить возврат")
