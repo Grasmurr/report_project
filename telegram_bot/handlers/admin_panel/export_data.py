@@ -66,6 +66,7 @@ async def back_from_choosing_event_for_uploading_data(message: Message, state: F
     await choose_event_for_uploading_data(message, state)
 
 def filter_data_by_event(data, event):
+    print (data)
     filtered_data = [item for item in data["data"] if item["event"] == event]
     if len(filtered_data) == 0:
         return "Для этого мероприятия нет билетов."
@@ -144,7 +145,8 @@ async def export_event_data(message: Message, state: FSMContext):
     event = data['event_name']
     file_format = message.text
 
-    tickets_data = await get_all_tickets()
+    tickets_data = await get_all_tickets(event=event)
+    print (tickets_data)
 
     filename = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
 
