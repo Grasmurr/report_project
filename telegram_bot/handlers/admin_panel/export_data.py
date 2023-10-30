@@ -32,7 +32,7 @@ from aiogram.utils.markdown import hcode
 from . import dp
 from telegram_bot.helpers import chat_backends
 from telegram_bot.states import AdminStates
-from telegram_bot.repository.api_methods import get_tickets_by_event
+# from telegram_bot.repository.api_methods import get_tickets_by_event
 import tempfile
 
 
@@ -144,6 +144,7 @@ async def export_event_data(message: Message, state: FSMContext):
 
     data = await state.get_data()
     event = data['event_name']
+    print (event)
     file_format = message.text
 
     tickets_data = await get_ticket_by_number_or_type(event=event)
