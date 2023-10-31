@@ -26,6 +26,7 @@ from telegram_bot.repository.api_methods import get_all_events, get_ticket_by_nu
 import csv
 import pandas as pd
 import io
+import tempfile, os
 
 
 import openpyxl
@@ -70,26 +71,14 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
 async def back_from_choosing_event_for_uploading_data(message: Message, state: FSMContext):
     await choose_event_for_uploading_data(message, state)
 
-def filter_data_by_event(data, event):
-    print (data)
-    filtered_data = [item for item in data["data"] if item["event"] == event]
-    if len(filtered_data) == 0:
-        return "Для этого мероприятия нет билетов."
-    return filtered_data
-
 def convert_data_to_file(data, event, file_format):
-    print (data)
-    filtered_data = filter_data_by_event(data, event)
 
-    if isinstance(filtered_data, str):
-        print(filtered_data)
-        filename = filtered_data
-        return filename
+
 
     if file_format == ".csv":
         filename = f"{event}.csv"
         with open(filename, "w", newline="") as csvfile:
-            fieldnames = filtered_data[0].keys()
+            fieldnames = data[0].keys()
             fieldnames_russian = {
                 "id": "ID",
                 "event": "Мероприятие",
@@ -108,7 +97,8 @@ def convert_data_to_file(data, event, file_format):
                 [{fieldnames_russian[field]: item[field] for field in fieldnames} for item in filtered_data])
     elif file_format == ".xlsx":
         filename = f"{event}.xlsx"
-        df = pd.DataFrame(filtered_data)
+        df = pd.DataFrame.from_dict(data['data'])
+        # было просто (data)
         df = df.rename(columns={
             "id": "ID",
             "event": "Мероприятие",
@@ -122,14 +112,19 @@ def convert_data_to_file(data, event, file_format):
             "educational_course": "Курс"
         })
         df.to_excel(filename, index=False)
-    else:
-        print("Неподдерживаемый формат файла")
 
-    # Open the file and return the file object
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_format)
+    temp_file_path = temp_file.name
+    temp_file.close()
+
     with open(filename, 'rb') as file:
-        file_obj = io.BytesIO(file.read())
+        with open(temp_file_path, 'wb') as temp_file:
+            temp_file.write(file.read())
 
-    return filename, file_obj
+    print (temp_file_path)
+
+    return temp_file_path, filename
+
 
 @dp.message(AdminStates.upload_data_in_format, F.text.in_(['.xlsx', '.csv']))
 async def export_event_data(message: Message, state: FSMContext):
@@ -138,25 +133,30 @@ async def export_event_data(message: Message, state: FSMContext):
     event = data['event_name']
     file_format = message.text
 
-    tickets_data = await get_ticket_by_number_or_type(event=event)
+    data = get_ticket_by_number_or_type(event=event)
 
-    filename, file_obj = convert_data_to_file(data=tickets_data, event=event, file_format=file_format)
+    print(data)
 
-    # if isinstance(file_obj, str):
-    #     markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие', 'Вернуться в меню админа')
-    #     await message.answer(file_obj, markup=markup)
-    #     return
+    if not data:
+        print(data)
+        filename = "На это мероприятие не было куплено билетов"
+        return filename
+
+    else:
+        temp_file_path, filename = await convert_data_to_file(data, event, file_format)
+
+    if filename=="Для этого мероприятия нет билетов.":
+        markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие', 'Вернуться в меню админа')
+        await message.answer(text=f'{filename}', markup=markup)
 
 
-    markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Выбрать другое мероприятие',
+    else:
+        markup = chat_backends.create_keyboard_buttons('Выгрузить в другом формате', 'Выбрать другое мероприятие',
                                                    'Вернуться в меню админа')
-
-    with open(filename, 'rb') as file:
-        file_obj = io.BytesIO(file.read())
-    # TODO: сделать как-то так чтобы формат файла отправлялся
-    await  message.answer_document(chat_id=message.from_user.id, document=file_obj, caption=f'Вот ваш файл в формате {file_format}',
+        with open(temp_file_path, 'rb') as file:
+            await message.answer_document(document=BufferedInputFile(file.read(), filename='file.jpg*'), caption=f'Вот ваш файл в формате {file_format}',
                             reply_markup=markup)
-
+            os.remove(temp_file_path)
 
     await state.set_state(AdminStates.upload_data_in_format_final)
 
