@@ -11,6 +11,8 @@ from telegram_bot.states import AdminStates
 from telegram_bot.repository.api_methods import create_event, get_all_events
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
+from telegram_bot.gdrive import api_methods
+
 import datetime
 
 
@@ -107,7 +109,6 @@ async def create_event_date(message: Message, state: FSMContext):
         await message.answer('Пожалуйста, введите дату в формате YYYY-MM-DD. Например: 2023-10-29')
 
 
-
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
 async def success_notification_and_recreate (message: Message, state: FSMContext):
     if message.text == 'Продолжить':
@@ -121,6 +122,8 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
             print(f'{i}: {data[i]}')
         print(data)
         await create_event(data['name'], data['nm_prime'], data['nm_usual'], data['event_date'])
+        api_methods.create_sheet(data['name'])
+
         events = await get_all_events()
         await message.answer(text=f'Вы успешно создали мероприятие: {events}')
         await state.set_state(AdminStates.main)

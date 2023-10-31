@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "refined-veld-380115",
+  "private_key_id": "d8a66c99ae727dd6815985fd1e690fee6b664719",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD2EXJ1YeCXMEjl\n2tRQttZIqV1VIiPzd1Lv1FYRElxJwBLLolaIUZ98ryO89uTD0HWTO+DaGLlH6gjU\naVz4yBlCcbeVdLxnkHcMiXjih68BiO2JuW5U2u//m+CRl5VU6qfAWf1P0joV5C19\n5aWa1EEbG/xz1HwUoQIBOu0WxVslxzfIB50ytiHZm6Gxjk7RxMEXTNfCFluCUvFi\nYyG1nAEUU+/zj4i4J8QSLnkW53cND98WTQiAko+Y389ydmvL0xBuauvEI/l5t/Bs\nfnjPycRQ6JeObkNYDMkNRiTUmfGqK1pX2lPSOVdPi5YOZRAh7QCVgFcIjgoIzq0x\nGYcBCoFVAgMBAAECggEAJm1KFRewZZvmPnMChgpPg3BjgWh/+cTwIEDmIetemyvS\nI5fZ8Jbik6ucJqXdytCSk+gdcKG8yYS8VUOQ/87r1usAUug0he3TEZOkW6f5xgEW\nq1PYbYr1QNMcalAkQ2sTwF+tRdpcNM/55LfIuVmdQzkHHyWXLPeJ4xxLKyut1MOt\nxr0o2IEW3QRl8AFh0oB4coh9XpTrB9yZ2Vnp5AdkN55k8ElFTkh91H4jRN1gcFvt\nZHgAKcYVKI8+oqZ0Vp3mjU/vROx8Cx8b8OiS2vjO0FQleUni0YPcstD4jYViJ4Vf\nXlKDGxhxWF4ZCTCFnhGoZhj7vl6kT9OFym1TzDgGTwKBgQD9qJ5te7MwCaPvqjtQ\nhe3FERi4r+3IcuCv7/0gm3n14cq8wSU8XtmHHmIxToSRm3bgBq0pI5QeTzPNkjA+\nyOFJ9RMU+46bBNdUxtf3MOFryo4ryb6n8wNhPM3Ns5O4Yuk8YbhStuyLik8EsMGO\nIYpukfHxWGME0/OFtZQTIu8uKwKBgQD4VuRs6y27vkBitqKnJwALmFI3CDIqDzfI\nDtA69agFpOg2S0ktmyIvxUlKfySxWOzcLrGg9dt86lxSeNQtaPF4jURDkgw/AxMv\nADLc1MHnz5S+puYCMJqkBGf/Uc1Wu+uV+JZOW6Ihe9YKSTnuUeWd1r9j10Egrz0K\nl97+vbTOfwKBgE6f54uUHjSzqEbvgzcwbET7Sahlj9TkFtUyFEn5J1KZzFe5nqsZ\n019YgaM67Uic4boLF716s7y5XBtKRv4PEhX0ixej6c4PMBetEuAiHJ1mya60+A3i\n+5c2W6x5Dz7GGfmHaLTq0mNmWZvglf5SUzB2uIHQndCvSfqWD/HmkDDFAoGBAJx1\n0lC1Ewk34kTPIEcDkUm82/+EEGbjU5edjZ+36fY0YYDjieVL2gwS1gwzcqCxj/lh\nCdSJUZGv7h6ftb4uYgQ7rIiN2V1RyKJSE7mB6fDsnaBIcp1qleNES2lW1nIQz2qb\nRcd0f/9sj/vHCtKVkn8RL1/t3ECFZ4XnDT2ds+5tAoGBAPksm6l/PvT8xplZV8sU\nz0f4/BrOqiLzxTu7+uG4+U4YD7MdcSGBBj3M7LfoPZB9HzfweQjRApJ/Rz42NT7s\n7kWDQsR68nJW2XjHTdOhzEBvwfIeXqyFaNXcFcCf9/H/8XL9ZJyBgLDJajBDd9ph\n88f6XlDDSXuVUDeQebCxW+Uz\n-----END PRIVATE KEY-----\n",
+  "client_email": "gamma-project@refined-veld-380115.iam.gserviceaccount.com",
+  "client_id": "115251839840406236765",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gamma-project%40refined-veld-380115.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

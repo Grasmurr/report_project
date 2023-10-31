@@ -15,6 +15,8 @@ from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_
 from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
+from telegram_bot.gdrive.api_methods import update_gdrive
+
 
 from PIL import Image, ImageFont, ImageDraw
 
@@ -201,6 +203,10 @@ async def registration_ends(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
+    ticket_info = await api_methods.get_ticket_by_number_or_type(data['participant_event'])
+
+    await update_gdrive(data['participant_event'], ticket_info)
+
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
 
