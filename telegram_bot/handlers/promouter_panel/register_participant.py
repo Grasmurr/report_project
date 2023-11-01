@@ -105,14 +105,14 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                             participant_number=participant_number,
                             participant_date_of_birth=participant_date_of_birth,
                             participant_course=int(participant_course),
-                            participant_ticket_price=int(participant_ticket_price))
+                            participant_ticket_price=int(participant_ticket_price),
+                            participant_phone_number=participant_number)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
                                                    'МИЭФ', 'ПАД', 'ПМИ',
                                                    'РиСО', 'Социология', 'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН',
                                                    'ФЭН', "Другая ОП", 'Не ВШЭ', 'Назад')
     await message.answer(text='Выберите образовательную программу, на которой обучается участник', reply_markup=markup)
-
 
 
 @dp.message(PromouterStates.enter_education_program_of_participant, F.text == 'Назад')
@@ -151,7 +151,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     participant_event = data['participant_event']
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
-                              f'Имя Фамилия : {participant_name[0]} {participant_surname[0]}\n'
+                              f'Имя Фамилия : {participant_name} {participant_surname}\n'
                               f'Номер телефона: {participant_number}\n'
                               f'Дата рождения:{participant_date_of_birth[0]}\n'
                               f'Курс: {participant_course}\n'
@@ -198,7 +198,8 @@ async def registration_ends(message: Message, state: FSMContext):
                                     date_of_birth=data['participant_date_of_birth'],
                                     price=data['participant_ticket_price'],
                                     educational_program=data['participant_ep'],
-                                    educational_course=data['participant_course'])
+                                    educational_course=data['participant_course'],
+                                    phone_number=data['participant_phone_number'])
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")

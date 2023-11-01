@@ -30,6 +30,7 @@ class Ticket(models.Model):
     price = models.IntegerField(null=True)
     educational_program = models.CharField(max_length=255, null=True)
     educational_course = models.IntegerField(null=True)
+    phone_number = models.BigIntegerField(null=True, default='99999999')
 
 
 class Promouter(models.Model):
