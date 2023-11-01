@@ -29,28 +29,83 @@ async def ticket_refund_start(message: Message, state: FSMContext):
     event_names = [event['name'] for event in events['data']]
     markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
     await state.set_state(AdminStates.choose_event_to_refund)
-    await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
+    await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета:',
                          reply_markup=markup)
 
-# @dp.message(AdminStates.choose_event_to_refund, F.text==Назад)
-# async def choose_event_for_ticket_refund(message: Message, state: FSMContext):
-#     ans = message.text
-#     if ans == 'Назад':
-#         await admin_menu(message)
-#     else:
-#         await message.answer('Хорошо! Выберите тип билета, который вы хотите вернуть:')
+
+@dp.message(AdminStates.choose_event_to_refund, F.text == "Назад")
+async def ticket_refund_choose_event_back(message: Message, state: FSMContext):
+    await admin_menu(message, state)
 
 
 @dp.message(AdminStates.choose_event_to_refund)
-async def ticket_refund_start(message: Message, state: FSMContext):
-    events = await api_methods.get_all_events()
-    event_names = [event['name'] for event in events['data']]
-    markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
-    await state.set_state(AdminStates.choose_event_to_refund)
-    await message.answer(text='Выберите мероприятие для которого вы хотите оформить возврат билета?',
-                         reply_markup=markup)
+async def ticket_refund_choose_type(message: Message, state: FSMContext):
+    # TODO: Проверка что это не случайное нажатие
+    event_to_refund = message.text
+    exists = await api_methods.get_event(event_to_refund)
+    if exists:
+        await state.update_data(event_to_refund=event_to_refund)
+        await state.set_state(AdminStates.enter_ticket_type_to_refund)
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Назад')
+        await message.answer(text='Выберите тип билета, который вы хотите вернуть:', reply_markup=markup)
+    else:
+        events = await api_methods.get_all_events()
+        event_names = [event['name'] for event in events['data']]
+        markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
+        await message.answer(text='Кажется, вы случайно нажали не на ту кнопку. Выберите мероприятие из списка кнопок:',
+                             reply_markup=markup)
 
 
-@dp.message(AdminStates.ticket_refund, F.text == 'Назад')
-async def back(message: Message, state: FSMContext):
+@dp.message(AdminStates.enter_ticket_type_to_refund, F.text == "Назад")
+async def ticket_type_choose_event_back(message: Message, state: FSMContext):
+    await ticket_refund_start(message, state)
+
+
+@dp.message(AdminStates.enter_ticket_type_to_refund)
+async def ticket_refund_choose_event(message: Message, state: FSMContext):
+    type_to_refund = message.text
+    if type_to_refund in ['Обычный', 'Прайм']:
+        await state.update_data(type_to_refund=type_to_refund)
+        await state.set_state(AdminStates.enter_ticket_number)
+        await message.answer(text='Пожалуйста, введите номер билета, который вы хотите вернуть:', reply_markup=ReplyKeyboardRemove())
+    else:
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Назад')
+        await message.answer(text='Кажется, вы случайно нажали не на ту кнопку. Выберите тип билета из списка кнопок:',
+                             reply_markup=markup)
+
+
+@dp.message(AdminStates.enter_ticket_number, F.text == 'Назад')
+async def back_to_ticket_type(message: Message, state: FSMContext):
+    await ticket_type_choose_event_back(message, state)
+
+
+@dp.message(AdminStates.enter_ticket_number)
+async def handle_ticket_number(message: Message, state: FSMContext):
+    number_to_refund = message.text
+    try:
+        number_to_refund = int(number_to_refund)
+        # TODO: Сделать проверку на то, что этот билет есть в базе
+        data = await state.get_data()
+
+        exists = await api_methods.get_ticket_by_number_or_type(event=data['event_to_refund'])
+        if exists:
+            await state.update_data(number_to_refund=number_to_refund)
+            markup = chat_backends.create_keyboard_buttons('Продолжить', 'Назад')
+            await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.'
+                                 f'\nИмя участника: *ИМЯ*\nФамилия: *ФАМИЛИЯя*.\n'
+                                 f'Тип билета: {data["type_to_refund"]} \n\nПродолжить?', reply_markup=markup)
+            await state.set_state(AdminStates.approve_ticket_refund)
+        else:
+            await message.answer('Кажется, такого билета нет в базе!\n\nПопробуйте ввести данные заново!')
+            await ticket_refund_start(message, state)
+    except:
+        await message.answer('Кажется, вы ввели не номер билета! Пожалуйста, введите номер цифрами. Например: 150:')
+
+
+@dp.message(AdminStates.enter_ticket_number)
+async def final_the_refund(message: Message, state: FSMContext):
+    # TODO: Добавить api_method Для возврата
+    data = await state.get_data()
+    await api_methods.delete_ticket(data['number_to_refund'])
+    await message.answer('Возврат произошел успешно!')
     await admin_menu(message, state)

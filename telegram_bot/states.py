@@ -22,6 +22,9 @@ class AdminStates(StatesGroup):
 
     ticket_refund = State()
     choose_event_to_refund = State()
+    enter_ticket_type_to_refund = State()
+    enter_ticket_number = State()
+    approve_ticket_refund = State()
 
 
 
