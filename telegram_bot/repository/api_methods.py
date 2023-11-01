@@ -182,8 +182,8 @@ async def delete_promouter(user_id):
     endpoint = f'promouter/{user_id}/'
     return await send_to_api(endpoint, method='DELETE')
 
-
-async def delete_ticket(ticket_number):
-    endpoint = f'ticket_delete/{ticket_number}/'
+# TODO: нужно изменить эту штуку чтобы можно было удалять билет по: 1 - мероприятию, 2 - типу билета, 3 - номеру билета
+async def delete_ticket(event, ticket_number):
+    endpoint = f'ticket_delete/{event}/'
     return await send_to_api(endpoint, method='DELETE')
 
