@@ -12,6 +12,8 @@ urlpatterns = [
     path('event/', views.EventView.as_view(), name='insert_event'),
     path('events/', views.EventView.as_view(), name='get_all_events'),
     path('event/<str:name>/', EventAPIView.as_view(), name='api_event_detail'),
+    path('event/<str:name>/increment/<str:field>/', views.IncrementView.as_view(), name='increment'),
+    path('event/<str:name>/decrement/<str:field>/', views.DecrementView.as_view(), name='decrement'),
 
     path('get_ticket/<int:ticket_number>/', views.TicketView.as_view(), name='get_ticket'),
     path('ticket/', views.TicketView.as_view(), name='insert_ticket'),

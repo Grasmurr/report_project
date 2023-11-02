@@ -166,9 +166,13 @@ async def update_promouter(user_id, username=None, full_name=None, phone_number=
         'full_name': full_name,
         'phone_number': phone_number
     }
-    # Удалите None значения из данных
     data = {k: v for k, v in data.items() if v is not None}
     return await send_to_api(endpoint, data)
+
+
+async def update_event(event_name, field, action):
+    endpoint = f'event/{event_name}/{action}/{field}/'
+    await send_to_api(endpoint, method='POST')
 
 
 ############################################################################################################
@@ -181,6 +185,7 @@ async def update_promouter(user_id, username=None, full_name=None, phone_number=
 async def delete_promouter(user_id):
     endpoint = f'promouter/{user_id}/'
     return await send_to_api(endpoint, method='DELETE')
+
 
 # TODO: нужно изменить эту штуку чтобы можно было удалять билет по: 1 - мероприятию, 2 - типу билета, 3 - номеру билета
 async def delete_ticket(event, ticket_number):

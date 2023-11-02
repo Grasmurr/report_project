@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
 
 import json
 from .models import Promouter, Event, Ticket
@@ -118,6 +119,37 @@ class TicketDeleteView(APIView):
 
         ticket.delete()
         return JsonResponse({'status': 'ok'}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class IncrementView(View):
+
+    def post(self, request, name, field):
+        event = get_object_or_404(Event, name=name)
+        if field == 'nm_prime':
+            event.nm_prime += 1
+        elif field == 'nm_usual':
+            event.nm_usual += 1
+        else:
+            return JsonResponse({'error': 'Invalid field'}, status=400)
+        event.save()
+        return JsonResponse({'success': True}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DecrementView(View):
+
+    def post(self, request, name, field):
+        event = get_object_or_404(Event, name=name)
+        if field == 'nm_prime':
+            event.nm_prime -= 1
+        elif field == 'nm_usual':
+            event.nm_usual -= 1
+        else:
+            return JsonResponse({'error': 'Invalid field'}, status=400)
+        event.save()
+        return JsonResponse({'success': True}, status=200)
+
 
 
 # class ExportTicketsView(APIView):
