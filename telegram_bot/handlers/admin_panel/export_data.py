@@ -68,6 +68,7 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
                              reply_markup=markup)
         await state.set_state(AdminStates.upload_data_in_format)
 
+
     elif data == []:
         markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие',
                                                        'Вернуться в меню админа')
