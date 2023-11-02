@@ -88,18 +88,24 @@ async def handle_ticket_number(message: Message, state: FSMContext):
         data = await state.get_data()
 
         exists = await api_methods.get_ticket_by_number_or_type(event=data['event_to_refund'])
+        print (exists)
         if exists:
+            data = exists
             await state.update_data(number_to_refund=number_to_refund)
             markup = chat_backends.create_keyboard_buttons('Продолжить', 'Назад')
-            await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.'
-                                 f'\nИмя участника: *ИМЯ*\nФамилия: *ФАМИЛИЯя*.\n'
+
+            name = data['data'][0]['ticket_holder_name']
+            surname = data['data'][0]['ticket_holder_surname']
+
+            await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.\n'
+                                 f'\nИмя: {name}\nФамилия: {surname}.\n'
                                  f'Тип билета: {data["type_to_refund"]} \n\nПродолжить?', reply_markup=markup)
             await state.set_state(AdminStates.approve_ticket_refund)
         else:
             await message.answer('Кажется, такого билета нет в базе!\n\nПопробуйте ввести данные заново!')
             await ticket_refund_start(message, state)
     except:
-        await message.answer('Кажется, вы ввели не номер билета! Пожалуйста, введите номер цифрами. Например: 150:')
+        await message.answer('Кажется, вы ввели не номер билета! Пожалуйста, введите номер цифрами. Например: 150')
 
 
 @dp.message(AdminStates.enter_ticket_number)

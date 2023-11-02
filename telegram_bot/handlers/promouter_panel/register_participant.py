@@ -21,6 +21,7 @@ from telegram_bot.gdrive.api_methods import update_gdrive
 from PIL import Image, ImageFont, ImageDraw
 
 
+
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
     events = await get_all_events()
@@ -44,8 +45,7 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
     # непонятно как сохранять мероприятие @рома
     await state.set_state(PromouterStates.enter_personal_data_of_participant)
     await message.answer(text='Введите данные участника в формате:\n\n'
-                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ'
-                              '\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
+                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
 def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
@@ -100,6 +100,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
 
+
     await state.update_data(participant_name=participant_name,
                             participant_surname=participant_surname,
                             participant_number=participant_number,
@@ -153,7 +154,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name} {participant_surname}\n'
                               f'Номер телефона: {participant_number}\n'
-                              f'Дата рождения:{participant_date_of_birth[0]}\n'
+                              f'Дата рождения:{participant_date_of_birth}\n'
                               f'Курс: {participant_course}\n'
                               f'Цена билета: {participant_ticket_price}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
