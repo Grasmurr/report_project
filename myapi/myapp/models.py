@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 
 class Event(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    ticket_number_start = models.IntegerField(null=False, default=100)
     nm_prime = models.IntegerField(null=False)
     nm_usual = models.IntegerField(null=False)
     date_of_event = models.DateField(default='2023-11-11')
@@ -14,10 +15,12 @@ class Event(models.Model):
 class Ticket(models.Model):
     REGULAR = 'regular'
     PRIME = 'prime'
+    DEPOSIT = 'deposit'
 
     TICKET_TYPE_CHOICES = [
         (REGULAR, 'Regular'),
         (PRIME, 'Prime'),
+        (DEPOSIT, 'deposit'),
     ]
 
     event = models.CharField(max_length=255)
