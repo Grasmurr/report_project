@@ -113,7 +113,6 @@ async def handle_ticket_number(message: Message, state: FSMContext):
         await ticket_refund_start(message, state)
 
 
-
 @dp.message(AdminStates.approve_ticket_refund)
 async def final_the_refund(message: Message, state: FSMContext):
     data = await state.get_data()
@@ -121,7 +120,7 @@ async def final_the_refund(message: Message, state: FSMContext):
                                     event=data['event_to_refund'],
                                     ticket_type=data['type_to_refund'])
     field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime'
-    await api_methods.update_event(event_name=data['event_to_refund'], action='increment', field=field)
+    await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
     await message.answer('Возврат произошел успешно!')
 
     ticket_info = await api_methods.get_ticket_by_number_or_type(data['event_to_refund'])

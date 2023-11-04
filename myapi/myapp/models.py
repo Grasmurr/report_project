@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class Event(models.Model):
@@ -6,6 +7,8 @@ class Event(models.Model):
     nm_prime = models.IntegerField(null=False)
     nm_usual = models.IntegerField(null=False)
     date_of_event = models.DateField(default='2023-11-11')
+    prices = ArrayField(models.IntegerField(), null=True)
+    is_hidden = models.BooleanField(default=False)
 
 
 class Ticket(models.Model):
@@ -31,6 +34,7 @@ class Ticket(models.Model):
     educational_program = models.CharField(max_length=255, null=True)
     educational_course = models.IntegerField(null=True)
     phone_number = models.BigIntegerField(null=True, default='99999999')
+    is_refunded = models.BooleanField(default=False)
 
 
 class Promouter(models.Model):

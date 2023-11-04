@@ -44,13 +44,14 @@ async def create_promouter(user_id, username, full_name, phone_number):
     return await send_to_api(endpoint, data)
 
 
-async def create_event(name, nm_prime, nm_usual, event_date):
+async def create_event(name, nm_prime, nm_usual, event_date, prices):
     endpoint = 'event/'
     data = {
         'name': name,
         'nm_prime': nm_prime,
         'nm_usual': nm_usual,
-        'date_of_event': event_date
+        'date_of_event': event_date,
+        'prices': prices
     }
     return await send_to_api(endpoint, data)
 
@@ -170,9 +171,21 @@ async def update_promouter(user_id, username=None, full_name=None, phone_number=
     return await send_to_api(endpoint, data)
 
 
-async def update_event(event_name, field, action):
+async def update_ticket_number(event_name, field, action):
     endpoint = f'event/{event_name}/{action}/{field}/'
     await send_to_api(endpoint, method='POST')
+
+
+async def update_event_data(name, nm_prime=None, nm_usual=None, event_date=None, prices=None):
+    endpoint = f'event_prices/{name}/'
+    data = {
+        'name': name,
+        'nm_prime': nm_prime,
+        'nm_usual': nm_usual,
+        'date_of_event': event_date,
+        'prices': prices
+    }
+    return await send_to_api(endpoint, data, method='POST')
 
 
 ############################################################################################################
@@ -187,7 +200,6 @@ async def delete_promouter(user_id):
     return await send_to_api(endpoint, method='DELETE')
 
 
-# TODO: нужно изменить эту штуку чтобы можно было удалять билет по: 1 - мероприятию, 2 - типу билета, 3 - номеру билета
 async def delete_ticket(event, ticket_number, ticket_type):
     endpoint = f'ticket_delete/{event}/{ticket_number}/{ticket_type}/'
     return await send_to_api(endpoint, method='DELETE')

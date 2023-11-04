@@ -23,8 +23,6 @@ from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 from telegram_bot.repository import api_methods
 
 
-
-
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
     # if message in data:
@@ -107,7 +105,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
         markup = create_keyboard_buttons('Зарегистрироваться')
         await bot.send_message(chat_id=ans[7:],
                                text=f'Добро пожаловать в телеграм бот агентства Гамма! '
-                             f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
+                               f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
                                reply_markup=markup)
 
 

@@ -18,7 +18,12 @@ import datetime
 
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
 async def manage_events(message: Message, state: FSMContext):
-    markup = chat_backends.create_keyboard_buttons('Создать мероприятие', 'Удалить мероприятие', 'Назад')
+    markup = chat_backends.create_keyboard_buttons('Создать мероприятие',
+                                                   'Удалить мероприятие',
+                                                   'Добавить билеты',
+                                                   'Изменить ценовой диапазон',
+                                                   'Скрыть/показать мероприятие',
+                                                   'Назад')
     await state.set_state(AdminStates.manage_events)
     await message.answer(text='Что вы хотите сделать?',
                          reply_markup=markup)
@@ -69,7 +74,7 @@ async def create_count_of_prime_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_prime_tickets = int(message.text)
         data = await state.get_data()
-        await message.answer (f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия «{data["name"]}».\n \n'
+        await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия «{data["name"]}».\n\n'
                               'Теперь введите число обычных билетов, которое вы хотите создать для этого мероприятия:')
         await state.update_data(nm_prime=count_of_prime_tickets)
         await state.set_state(AdminStates.enter_count_of_event_normal)
@@ -100,17 +105,38 @@ async def create_event_date(message: Message, state: FSMContext):
         event_date = datetime.datetime.strptime(message.text, '%Y-%m-%d').date()
         event_date_str = event_date.strftime('%Y-%m-%d')
         await state.update_data(event_date=event_date_str)
-        markup = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
-        await message.answer(f'Дата мероприятия установлена на {event_date_str}. Если это верно, нажмите "Продолжить".',
-                             reply_markup=markup)
-        await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+
+        await message.answer(f'Дата мероприятия установлена на {event_date_str}\n\nА теперь, введите список цен, которое вы хотите предусмотреть:'
+                             '\n\nНапример:\n1500\n2000\n2500\n\nКаждое с новой строки!')
+        await state.set_state(AdminStates.enter_prices_range)
 
     except ValueError:
         await message.answer('Пожалуйста, введите дату в формате YYYY-MM-DD. Например: 2023-10-29')
 
 
+@dp.message(AdminStates.enter_prices_range)
+async def handle_prices_range(message: Message, state: FSMContext):
+    rng = message.text.split('\n')
+    print(rng)
+    if not rng:
+        await message.answer('Попробуйте ввести список еще раз')
+    try:
+        rng = [int(i) for i in rng]
+        print(rng)
+        await state.update_data(prices_range=rng)
+        data = await state.get_data()
+        str_prices = [str(i) for i in data["prices_range"]]
+        buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
+        await message.answer(f'Хорошо! Вы добавляете мероприятие {data["name"]}\n'
+                             f'Количество билетов:\nОбычных:{data["nm_usual"]}\nПрайм:{data["nm_prime"]}\n\n'
+                             f'Дата:{data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}', reply_markup=buttons)
+        await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+    except:
+        await message.answer('Попробуйте ввести список еще раз')
+
+
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
-async def success_notification_and_recreate (message: Message, state: FSMContext):
+async def success_notification_and_recreate(message: Message, state: FSMContext):
     if message.text == 'Продолжить':
         markup = chat_backends.create_keyboard_buttons("Управление мероприятиями",
                                                        "Оформить возврат",
@@ -121,7 +147,11 @@ async def success_notification_and_recreate (message: Message, state: FSMContext
         for i in data:
             print(f'{i}: {data[i]}')
         print(data)
-        await create_event(data['name'], data['nm_prime'], data['nm_usual'], data['event_date'])
+        await create_event(name=data['name'],
+                           nm_prime=data['nm_prime'],
+                           nm_usual=data['nm_usual'],
+                           event_date=data['event_date'],
+                           prices=data['prices_range'])
         api_methods.create_sheet(data['name'])
 
         events = await get_all_events()

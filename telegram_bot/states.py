@@ -14,6 +14,8 @@ class AdminStates(StatesGroup):
     enter_count_of_event_prime = State()
     enter_event_date = State()
     enter_count_of_event_normal = State()
+    enter_prices_range = State()
+    continue_to_prices_range = State()
     saving_or_editing_from_the_beginning = State()
 
     upload_data = State()
@@ -25,6 +27,11 @@ class AdminStates(StatesGroup):
     enter_ticket_type_to_refund = State()
     enter_ticket_number = State()
     approve_ticket_refund = State()
+
+    enter_event_name_for_ticket_addition = State()
+    enter_ticket_type_for_addition = State()
+    enter_number_of_tickets_for_addition = State()
+    confirm_ticket_addition = State()
 
 
 

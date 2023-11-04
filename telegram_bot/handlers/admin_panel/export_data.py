@@ -68,7 +68,6 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
                              reply_markup=markup)
         await state.set_state(AdminStates.upload_data_in_format)
 
-
     elif data == []:
         markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие',
                                                        'Вернуться в меню админа')
@@ -137,12 +136,13 @@ async def export_event_data(message: Message, state: FSMContext):
     caption = f"Вот ваш файл в формате {file_format}"
     with open(file_path, "rb") as file:
         await message.answer_document(document=BufferedInputFile(file.read(), filename=f'{event}{file_format}*'),
-                                    caption=caption, reply_markup=markup)
+                                      caption=caption, reply_markup=markup)
 
 
     os.remove(file_path)
 
     await state.set_state(AdminStates.upload_data_in_format_final)
+
 
 @dp.message(AdminStates.upload_data_in_format_final, F.text == 'Выгрузить в другом формате')
 async def upload_data_in_another_format(message: Message, state: FSMContext):

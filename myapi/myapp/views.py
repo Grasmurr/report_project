@@ -84,6 +84,22 @@ class EventAPIView(APIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
+class EventCreateOrUpdateView(View):
+    def post(self, request, name):
+        data = json.loads(request.body)
+        prices = data.get('prices', [])
+        data['prices'] = prices
+
+        event, created = Event.objects.update_or_create(
+            name=name,
+            defaults=data
+        )
+
+        status_code = 201 if created else 200  # 201 Created если объект был создан, иначе 200 OK
+        return JsonResponse({'status': 'ok'}, status=status_code)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
 class TicketView(View):
     def post(self, request):
         data = json.loads(request.body)

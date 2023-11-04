@@ -21,7 +21,6 @@ from telegram_bot.gdrive.api_methods import update_gdrive
 from PIL import Image, ImageFont, ImageDraw
 
 
-
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
     events = await get_all_events()
@@ -45,7 +44,8 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
     # непонятно как сохранять мероприятие @рома
     await state.set_state(PromouterStates.enter_personal_data_of_participant)
     await message.answer(text='Введите данные участника в формате:\n\n'
-                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
+                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ'
+                              '\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
 
 
 def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
@@ -79,6 +79,10 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
+    if len(data_blocks) != 5:
+        await message.answer('Кажется, вы ввели данные об участнике в неверном формата! '
+                             'Обратите внимание на форму выше!')
+        return
     print(data_blocks[0])
     participant_name = data_blocks[0].split()[0]
     print(participant_name)
@@ -98,7 +102,6 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                                   ticket_price=participant_ticket_price):
         await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
         return
-
 
     await state.update_data(participant_name=participant_name,
                             participant_surname=participant_surname,
@@ -208,7 +211,7 @@ async def registration_ends(message: Message, state: FSMContext):
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
     os.remove(temp_file_path)
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime'
-    await api_methods.update_event(event_name=data['participant_event'], action='decrement', field=field)
+    await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
 
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
