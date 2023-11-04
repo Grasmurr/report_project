@@ -40,11 +40,11 @@ async def back_from_choose_event_for_participants_registration(message: Message,
 async def enter_personal_data_of_participant(message: Message, state: FSMContext):
     events = await get_all_events()
     event_names = [event['name'] for event in events['data'] if event['is_hidden'] is False]
-    if message.text not in event_names and message.text != "Назад":
+    if message.text not in event_names and message.text != "Назад" and message.text != "Ввести данные участника заново":
         await message.answer(text='Кажется такого мероприятия не существует! Попробуйте выбрать '
                                   'название мероприятия из представленных на кнопках ниже')
         return
-    if message.text != "Назад":
+    if message.text != "Назад" and message.text != "Ввести данные участника заново":
         participant_event = message.text
     else:
         data = await state.get_data()
@@ -88,7 +88,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
-    if len(data_blocks) != 4:
+    if len(data_blocks) != 4 and data_blocks != "Назад":
         await message.answer('Кажется, вы ввели данные об участнике в неверном формате! '
                              'Обратите внимание на форму выше!')
         return
@@ -137,11 +137,17 @@ async def enter_ticket_type(message: Message, state: FSMContext):
                'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ', 'РиСО', 'Социология',
                'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП",
                'Не ВШЭ']
-    if message.text not in ep_list:
+    if message.text not in ep_list and message.text != "Изменить тип билета":
         await message.answer('Кажется вы ввели название образовательной программы с '
                              'клавиатуры. Пожалуйста, используйте кнопки')
         return
-    participant_ep = message.text
+
+    if message.text == "Изменить тип билета":
+        data = await state.get_data()
+        participant_ep = data['participant_ep']
+    else:
+        participant_ep = message.text
+
     data = await state.get_data()
     event = data['participant_event']
     print(event)
@@ -220,11 +226,11 @@ async def confirm_participant(message: Message, state: FSMContext):
     participant_event = data['participant_event']
     ticket_type = data['ticket_type']
 
-    markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
+    markup = chat_backends.create_keyboard_buttons('Подтвердить', "Отменить регистрацию этого билета", "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name} {participant_surname}\n'
                               f'Номер телефона: {participant_number}\n'
-                              f'Дата рождения:{participant_date_of_birth}\n'
+                              f'Дата рождения: {participant_date_of_birth}\n'
                               f'Курс: {participant_course}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
                               f'Вид билета: {ticket_type}\n'
@@ -281,11 +287,13 @@ async def registration_ends(message: Message, state: FSMContext):
 
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
+@dp.message(PromouterStates.confirm_participant, F.text == "Отменить регистрацию этого билета")
+async def cancel_participant_regintration(message: Message, state: FSMContext):
+    await accepted_promouter_panel(message, state)
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
 async def change_ticket_type(message: Message, state: FSMContext):
     await enter_ticket_type(message, state)
-
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Ввести данные участника заново")
 async def remake_registration(message: Message, state: FSMContext):
