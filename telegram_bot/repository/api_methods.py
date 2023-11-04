@@ -185,7 +185,8 @@ async def update_event_data(name, nm_prime=None, nm_usual=None, event_date=None,
         'date_of_event': event_date,
         'prices': prices
     }
-    return await send_to_api(endpoint, data, method='POST')
+    clean_data = {k: v for k, v in data.items() if v is not None}
+    return await send_to_api(endpoint, clean_data, method='POST')
 
 
 ############################################################################################################

@@ -87,16 +87,22 @@ class EventAPIView(APIView):
 class EventCreateOrUpdateView(View):
     def post(self, request, name):
         data = json.loads(request.body)
-        prices = data.get('prices', [])
-        data['prices'] = prices
 
-        event, created = Event.objects.update_or_create(
-            name=name,
-            defaults=data
-        )
+        event, created = Event.objects.get_or_create(name=name)
 
-        status_code = 201 if created else 200  # 201 Created если объект был создан, иначе 200 OK
+        fields_to_update = {}
+        for key, value in data.items():
+            if hasattr(event, key) and value is not None:
+                fields_to_update[key] = value
+
+        if fields_to_update:
+            for key, value in fields_to_update.items():
+                setattr(event, key, value)
+            event.save(update_fields=fields_to_update.keys())
+
+        status_code = 201 if created else 200
         return JsonResponse({'status': 'ok'}, status=status_code)
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
