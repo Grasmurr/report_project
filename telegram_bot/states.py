@@ -40,6 +40,9 @@ class AdminStates(StatesGroup):
     enter_price_range_for_change = State()
     saving_or_editing_from_the_beginning_price_range = State()
 
+    choose_event_to_show = State()
+    choose_action_to_show_or_hide = State()
+
 
 
 class PromouterStates(StatesGroup):

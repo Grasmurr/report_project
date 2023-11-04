@@ -51,9 +51,9 @@ async def handle_price_range_for_change(message: Message, state: FSMContext):
         print(rng)
         await state.update_data(prices_range=rng)
         data = await state.get_data()
-        str_prices = [str(i) for i in data["prices_range"]]
+        str_prices = [str(i) for i in rng]
         buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
-        await message.answer(f'Хорошо! Для мероприятия {data["name"]}\n'
+        await message.answer(f'Хорошо! Для мероприятия {data["event_name"]}\n'
                              f'Ценовой диапазон теперь выглядит вот так: {"-".join(str_prices)}',
                              reply_markup=buttons)
         await state.set_state(AdminStates.saving_or_editing_from_the_beginning_price_range)

@@ -173,6 +173,22 @@ class DecrementView(View):
         return JsonResponse({'success': True}, status=200)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class ToggleEventHiddenStatusView(View):
+    def post(self, request, name):
+        try:
+            event = Event.objects.get(name=name)
+            is_hidden = request.POST.get('is_hidden')  # Извлекаем значение is_hidden из POST-запроса
+            if is_hidden is not None and is_hidden in ('True', 'False'):
+                event.is_hidden = is_hidden == 'True'
+                event.save()
+                return JsonResponse({'status': 'ok'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid is_hidden value'}, status=400)
+        except Event.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found'}, status=404)
+
+
 
 # class ExportTicketsView(APIView):
 #     def get(self, request, format='.xlsx', event='SKYNET'):
