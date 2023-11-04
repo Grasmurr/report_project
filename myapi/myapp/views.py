@@ -178,9 +178,13 @@ class ToggleEventHiddenStatusView(View):
     def post(self, request, name):
         try:
             event = Event.objects.get(name=name)
-            is_hidden = request.POST.get('is_hidden')  # Извлекаем значение is_hidden из POST-запроса
-            if is_hidden is not None and is_hidden in ('True', 'False'):
-                event.is_hidden = is_hidden == 'True'
+            # Измените эту строку для работы с JSON
+            data = json.loads(request.body)
+            is_hidden = data.get('is_hidden')  # Теперь это должно работать с JSON
+
+            if is_hidden is not None and is_hidden in ['true', 'false']:
+                is_hidden = bool(is_hidden.capitalize())
+                event.is_hidden = is_hidden
                 event.save()
                 return JsonResponse({'status': 'ok'})
             else:

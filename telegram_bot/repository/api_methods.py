@@ -191,9 +191,8 @@ async def update_event_data(name, nm_prime=None, nm_usual=None, event_date=None,
 
 async def update_event_visibility(event_name, is_hidden):
     url = f'events/{event_name}/toggle_hidden/'
-    data = {'is_hidden': str(is_hidden)}
-    response = await send_to_api(url, data)
-    return response
+    data = {'is_hidden': str(is_hidden).lower()}
+    return await send_to_api(url, data, method='POST')
 
 
 ############################################################################################################

@@ -25,7 +25,7 @@ from telegram_bot.gdrive.api_methods import update_gdrive
 from telegram_bot.repository import api_methods
 
 
-@dp.message(AdminStates.main, F.text == 'Скрыть/показать мероприятие')
+@dp.message(AdminStates.manage_events, F.text == 'Скрыть/показать мероприятие')
 async def event_delete_start(message: Message, state: FSMContext):
     events = await api_methods.get_all_events()
     event_names = [event['name'] for event in events['data']]
@@ -61,10 +61,12 @@ async def handle_action_for_event_to_hide_or_show(message: Message, state: FSMCo
         data = await state.get_data()
         await api_methods.update_event_visibility(data['event_name'], is_hidden=True)
         await message.answer(f'Хорошо! Вы скрыли мероприятие {data["event_name"]} для промоутеров!')
+        await admin_menu(message, state)
     elif action == 'Показать':
         data = await state.get_data()
         await api_methods.update_event_visibility(data['event_name'], is_hidden=False)
         await message.answer(f'Хорошо! Вы показали мероприятие {data["event_name"]} для промоутеров!')
+        await admin_menu(message, state)
     else:
         markup = chat_backends.create_keyboard_buttons('Скрыть', 'Показать', 'Назад')
         await message.answer('Кажется, вы нажали не туда! Попробуйте воспользоваться одной из кнопок:',
