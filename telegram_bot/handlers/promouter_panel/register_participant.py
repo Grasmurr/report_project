@@ -12,7 +12,7 @@ from aiogram.types.input_file import BufferedInputFile
 
 from telegram_bot.states import PromouterStates
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
-from telegram_bot.repository.api_methods import get_all_events
+from telegram_bot.repository.api_methods import get_all_events, get_event_by_name
 from telegram_bot.repository import api_methods
 
 from telegram_bot.gdrive.api_methods import update_gdrive
@@ -38,17 +38,26 @@ async def back_from_choose_event_for_participants_registration(message: Message,
 
 @dp.message(PromouterStates.choose_event_for_participants_registration)
 async def enter_personal_data_of_participant(message: Message, state: FSMContext):
-    participant_event = message.text
+    events = await get_all_events()
+    event_names = [event['name'] for event in events['data']]
+    if message.text not in event_names and message.text != "Назад":
+        await message.answer(text='Кажется такого мероприятия не существует! Попробуйте выбрать '
+                                  'название мероприятия из представленных на кнопках ниже')
+        return
+    if message.text != "Назад":
+        participant_event = message.text
+    else:
+        data = await state.get_data()
+        participant_event = data["participant_event"]
     data = await state.get_data()
     await state.update_data(participant_event=participant_event)
-    # непонятно как сохранять мероприятие @рома
     await state.set_state(PromouterStates.enter_personal_data_of_participant)
     await message.answer(text='Введите данные участника в формате:\n\n'
-                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД:ММ:ГГГГ'
-                              '\nКурс (цифрой)\nЦена билета', reply_markup=ReplyKeyboardRemove())
+                              'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД.ММ.ГГГГ'
+                              '\nКурс (цифрой)', reply_markup=ReplyKeyboardRemove())
 
 
-def check_participant_data(name, surname, phone_number, birth_date, course, ticket_price):
+def check_participant_data(name, surname, phone_number, birth_date, course):
     # Проверка имени и фамилии
     if not name.isalpha():
         return False
@@ -60,7 +69,7 @@ def check_participant_data(name, surname, phone_number, birth_date, course, tick
     if not phone_number.isdigit() or len(phone_number) != 11:
         return False
 
-    date_pattern = r"^\d{2}:\d{2}:\d{4}$"
+    date_pattern = r"^\d{2}.\d{2}.\d{4}$"
     if not re.match(date_pattern, birth_date):
         return False
 
@@ -68,8 +77,8 @@ def check_participant_data(name, surname, phone_number, birth_date, course, tick
     if not course.isdigit():
         return False
 
-    if not ticket_price.isdigit() or int(ticket_price) > 10000:
-        return False
+    # if not ticket_price.isdigit() or int(ticket_price) > 10000:
+    #     return False
 
     return True
 
@@ -79,8 +88,8 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
-    if len(data_blocks) != 5:
-        await message.answer('Кажется, вы ввели данные об участнике в неверном формата! '
+    if len(data_blocks) != 4:
+        await message.answer('Кажется, вы ввели данные об участнике в неверном формате! '
                              'Обратите внимание на форму выше!')
         return
     print(data_blocks[0])
@@ -90,17 +99,17 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     participant_number = data_blocks[1]
     participant_date_of_birth = data_blocks[2]
     participant_course = data_blocks[3]
-    participant_ticket_price = data_blocks[4]
+    # participant_ticket_price = data_blocks[4]
 
-    print(participant_name, participant_number, participant_date_of_birth, participant_course, participant_ticket_price)
+    print(participant_name, participant_number, participant_date_of_birth, participant_course)
 
     if not check_participant_data(name=participant_name,
                                   surname=participant_surname,
                                   phone_number=participant_number,
                                   birth_date=participant_date_of_birth,
-                                  course=participant_course,
-                                  ticket_price=participant_ticket_price):
-        await message.answer("Неверный формат данных участника. Пожалуйста, повторите ввод.")
+                                  course=participant_course):
+        await message.answer("Кажется, вы ввели данные об участнике в неверном формате! "
+                             "Обратите внимание на форму выше!")
         return
 
     await state.update_data(participant_name=participant_name,
@@ -108,7 +117,7 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                             participant_number=participant_number,
                             participant_date_of_birth=participant_date_of_birth,
                             participant_course=int(participant_course),
-                            participant_ticket_price=int(participant_ticket_price),
+                            # participant_ticket_price=int(participant_ticket_price),
                             participant_phone_number=participant_number)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
@@ -125,6 +134,14 @@ async def back_from_enter_education_program_of_participant(message: Message, sta
 
 @dp.message(PromouterStates.enter_education_program_of_participant)
 async def enter_ticket_type(message: Message, state: FSMContext):
+    ep_list = ['Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА',
+               'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ', 'РиСО', 'Социология',
+               'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН','ФЭН', "Другая ОП",
+               'Не ВШЭ']
+    if message.text not in ep_list:
+        await message.answer('Кажется вы ввели название образовательной программы с '
+                             'клавиатуры. Пожалуйста, используйте кнопки')
+        return
     participant_ep = message.text
     data = await state.get_data()
     event = data['participant_event']
@@ -148,7 +165,11 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
+    accepted_formats = ['Обычный', 'Прайм']
     ticket_type = message.text
+    if ticket_type not in accepted_formats:
+        await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
+                             "кнопки ниже чтобы выбрать тип билета")
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
     print(data)
@@ -164,6 +185,28 @@ async def confirm_participant(message: Message, state: FSMContext):
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
+
+    prices = event_data['data'][0]["prices"]
+    markup = chat_backends.create_keyboard_buttons(*prices, 'Назад')
+
+
+    await message.answer("Выберите цену, по которой был продан билет",
+                         reply_markup=markup)
+    await state.set_state(PromouterStates.enter_price)
+
+@dp.message(PromouterStates.enter_price)
+async def confirm_participant(message: Message, state: FSMContext):
+    data = await state.get_data()
+    event = data['participant_event']
+    event_data = await api_methods.get_event_by_name(event)
+    prices = event_data['data'][0]["prices"]
+    if message.text not in prices:
+        await message.answer (text="Пожалуйста, выберите цену из предложенных на кнопках")
+        return
+    participant_ticket_price = message.text
+    await state.update_data(participant_ticket_price=participant_ticket_price)
+
+
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
     participant_number = data['participant_number']
@@ -172,6 +215,8 @@ async def confirm_participant(message: Message, state: FSMContext):
     participant_ticket_price = data['participant_ticket_price']
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
+    ticket_type = data['ticket_type']
+
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name} {participant_surname}\n'
@@ -236,10 +281,10 @@ async def registration_ends(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
 async def change_ticket_type(message: Message, state: FSMContext):
-    await enter_personal_data_of_participant(message, state)
+    await enter_ticket_type(message, state)
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Ввести данные участника заново")
 async def remake_registration(message: Message, state: FSMContext):
-    await enter_ticket_type(message, state)
+    await enter_personal_data_of_participant(message, state)
 

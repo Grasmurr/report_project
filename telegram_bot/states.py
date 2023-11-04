@@ -47,6 +47,7 @@ class PromouterStates(StatesGroup):
     enter_personal_data_of_participant = State()
     enter_education_program_of_participant = State()
     enter_ticket_type = State()
+    enter_price = State()
     confirm_participant = State()
     choose_event_for_participants_refund = State()
     choose_ticket_type_for_refund = State()
