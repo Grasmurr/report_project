@@ -24,7 +24,7 @@ from PIL import Image, ImageFont, ImageDraw
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
     events = await get_all_events()
-    event_names = [event['name'] for event in events['data']]
+    event_names = [event['name'] for event in events['data'] if event['is_hidden'] is False]
     markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
     await state.set_state(PromouterStates.choose_event_for_participants_registration)
     await message.answer(text='Выберите мероприятие, на которое вы хотите зарегистрировать участника',
@@ -39,7 +39,7 @@ async def back_from_choose_event_for_participants_registration(message: Message,
 @dp.message(PromouterStates.choose_event_for_participants_registration)
 async def enter_personal_data_of_participant(message: Message, state: FSMContext):
     events = await get_all_events()
-    event_names = [event['name'] for event in events['data']]
+    event_names = [event['name'] for event in events['data'] if event['is_hidden'] is False]
     if message.text not in event_names and message.text != "Назад":
         await message.answer(text='Кажется такого мероприятия не существует! Попробуйте выбрать '
                                   'название мероприятия из представленных на кнопках ниже')
@@ -190,10 +190,10 @@ async def confirm_participant(message: Message, state: FSMContext):
     prices = [str(num) for num in prices]
     markup = chat_backends.create_keyboard_buttons(*prices, 'Назад')
 
-
     await message.answer("Выберите цену, по которой был продан билет",
                          reply_markup=markup)
     await state.set_state(PromouterStates.enter_price)
+
 
 @dp.message(PromouterStates.enter_price)
 async def confirm_participant(message: Message, state: FSMContext):
