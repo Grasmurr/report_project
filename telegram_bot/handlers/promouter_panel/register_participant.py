@@ -12,7 +12,7 @@ from aiogram.types.input_file import BufferedInputFile
 
 from telegram_bot.states import PromouterStates
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
-from telegram_bot.repository.api_methods import get_all_events, get_event_by_name
+from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
 from telegram_bot.gdrive.api_methods import update_gdrive
