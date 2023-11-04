@@ -14,4 +14,3 @@ from telegram_bot.repository import api_methods
 async def start_mailing(message: Message, state: FSMContext):
     pass
 
-

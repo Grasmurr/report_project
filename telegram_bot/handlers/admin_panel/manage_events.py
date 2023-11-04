@@ -19,7 +19,6 @@ import datetime
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
 async def manage_events(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Создать мероприятие',
-                                                   'Удалить мероприятие',
                                                    'Добавить билеты',
                                                    'Изменить ценовой диапазон',
                                                    'Скрыть/показать мероприятие',

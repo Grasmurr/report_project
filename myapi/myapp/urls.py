@@ -15,6 +15,7 @@ urlpatterns = [
     path('event/<str:name>/increment/<str:field>/', views.IncrementView.as_view(), name='increment'),
     path('event/<str:name>/decrement/<str:field>/', views.DecrementView.as_view(), name='decrement'),
     path('event_prices/<str:name>/', views.EventCreateOrUpdateView.as_view(), name='event-create-or-update'),
+    path('events/<str:name>/toggle_hidden/', views.ToggleEventHiddenStatusView.as_view(), name='toggle_event_hidden'),
 
     path('get_ticket/<int:ticket_number>/', views.TicketView.as_view(), name='get_ticket'),
     path('ticket/', views.TicketView.as_view(), name='insert_ticket'),

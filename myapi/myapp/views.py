@@ -87,16 +87,22 @@ class EventAPIView(APIView):
 class EventCreateOrUpdateView(View):
     def post(self, request, name):
         data = json.loads(request.body)
-        prices = data.get('prices', [])
-        data['prices'] = prices
 
-        event, created = Event.objects.update_or_create(
-            name=name,
-            defaults=data
-        )
+        event, created = Event.objects.get_or_create(name=name)
 
-        status_code = 201 if created else 200  # 201 Created если объект был создан, иначе 200 OK
+        fields_to_update = {}
+        for key, value in data.items():
+            if hasattr(event, key) and value is not None:
+                fields_to_update[key] = value
+
+        if fields_to_update:
+            for key, value in fields_to_update.items():
+                setattr(event, key, value)
+            event.save(update_fields=fields_to_update.keys())
+
+        status_code = 201 if created else 200
         return JsonResponse({'status': 'ok'}, status=status_code)
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -165,6 +171,22 @@ class DecrementView(View):
             return JsonResponse({'error': 'Invalid field'}, status=400)
         event.save()
         return JsonResponse({'success': True}, status=200)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ToggleEventHiddenStatusView(View):
+    def post(self, request, name):
+        try:
+            event = Event.objects.get(name=name)
+            is_hidden = request.POST.get('is_hidden')  # Извлекаем значение is_hidden из POST-запроса
+            if is_hidden is not None and is_hidden in ('True', 'False'):
+                event.is_hidden = is_hidden == 'True'
+                event.save()
+                return JsonResponse({'status': 'ok'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid is_hidden value'}, status=400)
+        except Event.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found'}, status=404)
 
 
 

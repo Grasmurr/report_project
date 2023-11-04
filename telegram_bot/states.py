@@ -31,7 +31,17 @@ class AdminStates(StatesGroup):
     enter_event_name_for_ticket_addition = State()
     enter_ticket_type_for_addition = State()
     enter_number_of_tickets_for_addition = State()
+    enter_count_of_event_normal_for_addition = State()
+    enter_count_of_event_prime_for_addition = State()
+    confirm_event_addition_tickets = State()
     confirm_ticket_addition = State()
+
+    choose_event_to_change_price_range = State()
+    enter_price_range_for_change = State()
+    saving_or_editing_from_the_beginning_price_range = State()
+
+    choose_event_to_show = State()
+    choose_action_to_show_or_hide = State()
 
 
 

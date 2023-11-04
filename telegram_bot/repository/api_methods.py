@@ -185,7 +185,15 @@ async def update_event_data(name, nm_prime=None, nm_usual=None, event_date=None,
         'date_of_event': event_date,
         'prices': prices
     }
-    return await send_to_api(endpoint, data, method='POST')
+    clean_data = {k: v for k, v in data.items() if v is not None}
+    return await send_to_api(endpoint, clean_data, method='POST')
+
+
+async def update_event_visibility(event_name, is_hidden):
+    url = f'events/{event_name}/toggle_hidden/'
+    data = {'is_hidden': str(is_hidden)}
+    response = await send_to_api(url, data)
+    return response
 
 
 ############################################################################################################
