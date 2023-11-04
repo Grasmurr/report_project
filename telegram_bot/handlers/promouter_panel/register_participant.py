@@ -117,7 +117,6 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                             participant_number=participant_number,
                             participant_date_of_birth=participant_date_of_birth,
                             participant_course=int(participant_course),
-                            # participant_ticket_price=int(participant_ticket_price),
                             participant_phone_number=participant_number)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
@@ -147,7 +146,6 @@ async def enter_ticket_type(message: Message, state: FSMContext):
     event = data['participant_event']
     print(event)
     await state.update_data(participant_ep=participant_ep)
-    await state.set_state(PromouterStates.enter_ticket_type)
     event_data = await api_methods.get_event_by_name(event)
 
     nm_prime = event_data['data'][0]['nm_prime']
@@ -156,6 +154,8 @@ async def enter_ticket_type(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Назад')
     await message.answer(text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})',
                          reply_markup=markup)
+    await state.set_state(PromouterStates.enter_ticket_type)
+
 
 
 @dp.message(PromouterStates.enter_ticket_type, F.text == 'Назад')
@@ -165,9 +165,8 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
-    accepted_formats = ['Обычный', 'Прайм']
     ticket_type = message.text
-    if ticket_type not in accepted_formats:
+    if ticket_type != 'Обычный' and ticket_type != 'Прайм':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
     await state.update_data(ticket_type=ticket_type)
@@ -187,6 +186,8 @@ async def confirm_participant(message: Message, state: FSMContext):
         return
 
     prices = event_data['data'][0]["prices"]
+    print (prices)
+    prices = [str(num) for num in prices]
     markup = chat_backends.create_keyboard_buttons(*prices, 'Назад')
 
 
@@ -200,19 +201,21 @@ async def confirm_participant(message: Message, state: FSMContext):
     event = data['participant_event']
     event_data = await api_methods.get_event_by_name(event)
     prices = event_data['data'][0]["prices"]
+    prices = [str(num) for num in prices]
     if message.text not in prices:
         await message.answer (text="Пожалуйста, выберите цену из предложенных на кнопках")
         return
     participant_ticket_price = message.text
     await state.update_data(participant_ticket_price=participant_ticket_price)
 
-
+    await state.get_data()
+    print (data)
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
     participant_number = data['participant_number']
     participant_date_of_birth = data["participant_date_of_birth"]
     participant_course = data['participant_course']
-    participant_ticket_price = data['participant_ticket_price']
+    participant_ticket_price = participant_ticket_price
     participant_ep = data['participant_ep']
     participant_event = data['participant_event']
     ticket_type = data['ticket_type']
@@ -223,9 +226,9 @@ async def confirm_participant(message: Message, state: FSMContext):
                               f'Номер телефона: {participant_number}\n'
                               f'Дата рождения:{participant_date_of_birth}\n'
                               f'Курс: {participant_course}\n'
-                              f'Цена билета: {participant_ticket_price}\n'
                               f'Образовательная программа: {participant_ep}\n\n'
-                              f'Вид билета: {ticket_type}', reply_markup=markup)
+                              f'Вид билета: {ticket_type}\n'
+                              f'Цена билета: {participant_ticket_price}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
 
 
@@ -257,7 +260,7 @@ async def registration_ends(message: Message, state: FSMContext):
     os.remove(temp_file_path)
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
-
+    print (f'выводим дату:{data}')
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
                                     name=data['participant_name'],
