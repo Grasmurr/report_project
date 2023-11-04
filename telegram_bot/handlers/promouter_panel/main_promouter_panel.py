@@ -112,7 +112,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
 async def accepted_promouter_panel(message: Message, state: FSMContext):
     await state.set_state(PromouterStates.main_accepted_promouter_panel)
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                   "Оформить возврат")
+                                                   "Оформить возврат",
+                                                   "Посмотреть количество билетов в наличии")
     await message.answer(text=f'Добро пожаловать в панель промоутера',
                            reply_markup=markup)
-
