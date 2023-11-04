@@ -135,7 +135,7 @@ async def back_from_enter_education_program_of_participant(message: Message, sta
 async def enter_ticket_type(message: Message, state: FSMContext):
     ep_list = ['Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА',
                'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ', 'РиСО', 'Социология',
-               'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН','ФЭН', "Другая ОП",
+               'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП",
                'Не ВШЭ']
     if message.text not in ep_list:
         await message.answer('Кажется вы ввели название образовательной программы с '
