@@ -7,6 +7,7 @@ class Event(models.Model):
     ticket_number_start = models.IntegerField(null=False, default=100)
     nm_prime = models.IntegerField(null=False)
     nm_usual = models.IntegerField(null=False)
+    nm_deposit = models.IntegerField(null=False, default=0)
     date_of_event = models.DateField(default='2023-11-11')
     prices = ArrayField(models.IntegerField(), null=True)
     is_hidden = models.BooleanField(default=False)
