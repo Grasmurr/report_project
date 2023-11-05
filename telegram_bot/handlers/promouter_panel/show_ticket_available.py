@@ -15,3 +15,11 @@ from telegram_bot.repository import api_methods
 
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Посмотреть количество билетов в наличии")
+async def identify_promouter(message: Message, state: FSMContext):
+    events = await get_all_events()
+    event_names = [event['name'] for event in events['data'] if event['is_hidden'] is False]
+    markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
+    await state.set_state(PromouterStates.choose_event_for_participants_registration)
+    await message.answer(text='Выберите мероприятие, на которое вы хотите зарегистрировать участника',
+                         reply_markup=markup)
+
