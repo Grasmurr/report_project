@@ -14,6 +14,7 @@ from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
 ADMIN_ID = 305378717
 
+
 @dp.message(AdminStates.main, F.text == 'Рассылка')
 async def start_mailing(message: Message, state: FSMContext):
     buttons = chat_backends.create_keyboard_buttons('Текст', 'Фото', 'Файл', 'Назад')
