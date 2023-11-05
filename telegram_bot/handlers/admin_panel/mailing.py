@@ -88,7 +88,8 @@ async def handle_photo(message: Message, state: FSMContext):
 
 @dp.message(AdminStates.mailing_with_text, F.text == 'Подтвердить')
 async def handle_text(message: Message, state: FSMContext):
-    pass
+    await mail_promouters(state)
+    await admin_menu(message, state)
 
 
 @dp.message(AdminStates.mailing_with_text)
@@ -102,15 +103,17 @@ async def handle_text(message: Message, state: FSMContext):
 
 @dp.message(AdminStates.mailing_with_file, F.text == 'Подтвердить')
 async def start_file_mailing(message: Message, state: FSMContext):
-    pass
+    await mail_promouters(state)
+    await admin_menu(message, state)
 
 
 @dp.message(AdminStates.mailing_with_photo, F.text == 'Подтвердить')
 async def start_photo_mailing(message: Message, state: FSMContext):
-    pass
+    await mail_promouters(state)
+    await admin_menu(message, state)
 
 
-async def mail_promouters(mailing_type: str, state: FSMContext):
+async def mail_promouters(state: FSMContext):
     ids = await api_methods.get_all_promouters()
     data = await state.get_data()
     mailing_type = data['mailing_type']
@@ -132,6 +135,7 @@ async def mail_promouters(mailing_type: str, state: FSMContext):
                 file_id, caption = content
                 await bot.send_document(chat_id=user_id, document=file_id, caption=caption)
         except:
-            await bot.send_message(chat_id=ADMIN_ID, text=f'Не получилось отправить пользователю {user_id}')
+            await bot.send_message(chat_id=ADMIN_ID, text=f'Не получилось отправить пользователю {user_id} '
+                                                          f'({i["full_name"]})')
 
 
