@@ -38,16 +38,16 @@ def create_sheet(list_name):
 
 def format_data_for_google_sheets(data):
     headers = [
-        "ID", "Event", "Ticket Number", "Имя",
+        "Мероприятие", "Номер билета", "Имя",
         "Фамилия", "Тип билета", "Дата рождения",
-        "Цена", "Программа обучения", "Курс", "Номер телефона"
+        "Цена", "Программа обучения", "Курс", "Номер телефона", "Возврат"
     ]
 
     rows = [[
-        item["id"], item["event"], item["ticket_number"],
+        item["event"], item["ticket_number"],
         item["ticket_holder_name"], item["ticket_holder_surname"],
         item["ticket_type"], item["date_of_birth"], item["price"],
-        item["educational_program"], item["educational_course"], item["phone_number"]
+        item["educational_program"], item["educational_course"], item["phone_number"], item["is_refunded"]
     ] for item in data["data"]]
 
     formatted_data = [headers] + rows

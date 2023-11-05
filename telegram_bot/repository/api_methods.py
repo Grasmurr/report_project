@@ -209,8 +209,9 @@ async def delete_promouter(user_id):
     return await send_to_api(endpoint, method='DELETE')
 
 
-async def delete_ticket(event, ticket_number, ticket_type):
-    endpoint = f'ticket_delete/{event}/{ticket_number}/{ticket_type}/'
-    return await send_to_api(endpoint, method='DELETE')
+async def return_ticket(event, ticket_number, ticket_type, new_price):
+    endpoint = f'ticket_update/{event}/{ticket_number}/{ticket_type}/'
+    data = {'new_price': new_price}
+    return await send_to_api(endpoint, data=data, method='POST')
 
 

@@ -2,6 +2,8 @@ from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from telegram_bot.repository import api_methods
 
+import datetime
+
 
 async def get_id_from_message(message: Message):
     return message.from_user.id
@@ -49,3 +51,18 @@ async def generate_next_ticket_number(event_name, ticket_type):
                 return start_point + 2800
             return mx_num + 1
 
+
+async def define_refund_percent(event_name):
+    event_info = await api_methods.get_event_by_name(event_name)
+    event_date = event_info['data'][0]['date_of_event']
+    target_date = datetime.datetime.strptime(event_date, '%Y-%m-%d')
+    today = datetime.datetime.today()
+    difference = (target_date - today).days + 1
+    coefficent = 1
+    if difference >= 10:
+        return coefficent
+    elif difference >= 5:
+        return 0.5
+    elif difference >= 3:
+        return 0.3
+    return False

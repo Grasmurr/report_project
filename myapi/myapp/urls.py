@@ -20,7 +20,7 @@ urlpatterns = [
     path('get_ticket/<int:ticket_number>/', views.TicketView.as_view(), name='get_ticket'),
     path('ticket/', views.TicketView.as_view(), name='insert_ticket'),
     path('tickets/', views.TicketView.as_view(), name='get_all_tickets'),
-    path('ticket_delete/<str:event>/<int:ticket_number>/<str:ticket_type>/', views.TicketDeleteView.as_view(),
+    path('ticket_update/<str:event>/<int:ticket_number>/<str:ticket_type>/', views.TicketUpdateView.as_view(),
          name='delete_ticket'),
 
 

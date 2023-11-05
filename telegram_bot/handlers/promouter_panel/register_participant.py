@@ -185,7 +185,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
-    if ticket_type != 'Обычный' and ticket_type != 'Прайм' and  ticket_type != 'Депозит':
+    if ticket_type != 'Обычный' and ticket_type != 'Прайм' and ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
     await state.update_data(ticket_type=ticket_type)

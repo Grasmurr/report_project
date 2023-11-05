@@ -117,3 +117,4 @@ async def accepted_promouter_panel(message: Message, state: FSMContext):
                                                    "Посмотреть количество билетов в наличии")
     await message.answer(text=f'Добро пожаловать в панель промоутера',
                            reply_markup=markup)
+

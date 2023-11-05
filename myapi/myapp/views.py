@@ -132,15 +132,21 @@ class TicketView(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class TicketDeleteView(APIView):
-    def delete(self, request, event, ticket_number, ticket_type):
+class TicketUpdateView(APIView):
+    def post(self, request, event, ticket_number, ticket_type):
+        new_price = request.data.get('new_price')
+        if new_price is None:
+            return Response({'error': 'New price is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             ticket = Ticket.objects.get(event=event, ticket_number=ticket_number, ticket_type=ticket_type)
         except Ticket.DoesNotExist:
-            return JsonResponse({'error': 'Ticket not found'}, status=404)
+            return Response({'error': 'Ticket not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        ticket.delete()
-        return JsonResponse({'status': 'ok'}, status=200)
+        ticket.is_refunded = True
+        ticket.price = new_price
+        ticket.save()
+        return Response({'status': 'ok'}, status=status.HTTP_200_OK)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
