@@ -118,6 +118,18 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
                             participant_date_of_birth=participant_date_of_birth,
                             participant_course=int(participant_course),
                             participant_phone_number=participant_number)
+    await state.set_state(PromouterStates.enter_participant_gender)
+    markup = chat_backends.create_keyboard_buttons("Мужской", "Женский", "Назад")
+    await message.answer(text='Укажите пол участника', reply_markup=markup)
+
+@dp.message(PromouterStates.enter_participant_gender, F.text == 'Назад')
+async def back_from_enter_education_program_of_participant(message: Message, state: FSMContext):
+    await enter_personal_data_of_participant(message, state)
+
+@dp.message(PromouterStates.enter_participant_gender, F.text.in_(["Мужской", "Женский"]))
+async def back_from_enter_education_program_of_participant(message: Message, state: FSMContext):
+    ticket_holder_sex = message.text
+    await state.update_data(participant_gender=ticket_holder_sex)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
     markup = chat_backends.create_keyboard_buttons('Бизнес информатика', 'Дизайн', 'Маркетинг', 'МиРА', 'МИЭМ',
                                                    'МИЭФ', 'ПАД', 'ПМИ',
@@ -156,9 +168,10 @@ async def enter_ticket_type(message: Message, state: FSMContext):
 
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
+    nm_deposit = event_data['data'][0]['nm_deposit']
 
-    markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Назад')
-    await message.answer(text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})',
+    markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
+    await message.answer(text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось {nm_deposit})',
                          reply_markup=markup)
     await state.set_state(PromouterStates.enter_ticket_type)
 
@@ -172,7 +185,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
-    if ticket_type != 'Обычный' and ticket_type != 'Прайм':
+    if ticket_type != 'Обычный' and ticket_type != 'Прайм' and  ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
     await state.update_data(ticket_type=ticket_type)
@@ -183,8 +196,9 @@ async def confirm_participant(message: Message, state: FSMContext):
 
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
-    if (ticket_type == 'Прайм' and nm_prime == 0) or (ticket_type == 'Обычный' and nm_usual == 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})', 'Назад')
+    nm_deposit = event_data['data'][0]['nm_deposit']
+    if (ticket_type == 'Прайм' and nm_prime == 0) or (ticket_type == 'Обычный' and nm_usual == 0) or (ticket_type == 'Депозит' and nm_deposit == 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})', f'Депозит ({nm_deposit})', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
             reply_markup=markup)
@@ -192,7 +206,7 @@ async def confirm_participant(message: Message, state: FSMContext):
         return
 
     prices = event_data['data'][0]["prices"]
-    print (prices)
+    print(prices)
     prices = [str(num) for num in prices]
     markup = chat_backends.create_keyboard_buttons(*prices, 'Назад')
 
@@ -209,7 +223,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     prices = event_data['data'][0]["prices"]
     prices = [str(num) for num in prices]
     if message.text not in prices:
-        await message.answer (text="Пожалуйста, выберите цену из предложенных на кнопках")
+        await message.answer(text="Пожалуйста, выберите цену из предложенных на кнопках")
         return
     participant_ticket_price = message.text
     await state.update_data(participant_ticket_price=participant_ticket_price)
@@ -218,6 +232,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     print (data)
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
+    participant_gender = data ['participant_gender']
     participant_number = data['participant_number']
     participant_date_of_birth = data["participant_date_of_birth"]
     participant_course = data['participant_course']
@@ -229,6 +244,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Подтвердить', "Отменить регистрацию этого билета", "Изменить тип билета",'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name} {participant_surname}\n'
+                              f'Пол: {participant_gender}\n'
                               f'Номер телефона: {participant_number}\n'
                               f'Дата рождения: {participant_date_of_birth}\n'
                               f'Курс: {participant_course}\n'
@@ -271,12 +287,14 @@ async def registration_ends(message: Message, state: FSMContext):
                                     ticket_number=num,
                                     name=data['participant_name'],
                                     surname=data['participant_surname'],
+                                    gender=data['participant_gender'],
                                     ticket_type=data['ticket_type'],
                                     date_of_birth=data['participant_date_of_birth'],
                                     price=data['participant_ticket_price'],
                                     educational_program=data['participant_ep'],
                                     educational_course=data['participant_course'],
-                                    phone_number=data['participant_phone_number'])
+                                    phone_number=data['participant_phone_number']
+                                    )
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат")

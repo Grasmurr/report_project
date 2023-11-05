@@ -57,7 +57,7 @@ async def create_event(name, nm_prime, nm_deposit, nm_usual, event_date, prices)
     return await send_to_api(endpoint, data)
 
 
-async def create_ticket(event, ticket_number, name, surname, ticket_type, date_of_birth, price, educational_program,
+async def create_ticket(event, ticket_number, name, surname, gender, ticket_type, date_of_birth, price, educational_program,
                         educational_course, phone_number):
     endpoint = 'ticket/'
 
@@ -66,6 +66,7 @@ async def create_ticket(event, ticket_number, name, surname, ticket_type, date_o
         'ticket_number': ticket_number,
         'ticket_holder_name': name,
         'ticket_holder_surname': surname,
+        'ticket_holder_sex': gender,
         'ticket_type': ticket_type,
         'date_of_birth': date_of_birth,
         'price': price,

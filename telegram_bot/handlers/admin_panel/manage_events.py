@@ -85,14 +85,28 @@ async def create_count_of_prime_tickets(message: Message, state: FSMContext):
 async def create_count_of_normal_tickets (message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_normal_tickets = int(message.text)
+        await state.update_data(nm_usual=count_of_normal_tickets)
+        await state.set_state(AdminStates.enter_count_of_event_deposit)
+        await message.answer(f"Вы создаете {count_of_normal_tickets} обычных билетов. "
+                             f"Теперь введите число депозитных билетов, которое вы хотите создать для этого мероприятия:")
+    else:
+        await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+
+@dp.message(AdminStates.enter_count_of_event_deposit)
+async def create_count_of_normal_tickets(message: Message, state: FSMContext):
+    if message.text.isdigit():
+        count_of_deposit_tickets = int(message.text)
+        await state.update_data(nm_deposit=count_of_deposit_tickets)
         data = await state.get_data()
         count_of_prime_tickets = data['nm_prime']
+        count_of_normal_tickets = data['nm_usual']
         name_of_event = data['name']
         await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов, '
-                             f'а также {count_of_normal_tickets} обычных билетов для мероприятия «{name_of_event}». '
+                             f'{count_of_normal_tickets} обычных билетов, '
+                             f'а также {count_of_deposit_tickets} депозитных билетов '
+                             f'для мероприятия «{name_of_event}». '
                              f'\n\nПожалуйста, введите дату в '
                              f'формате YYYY-MM-DD. Например: 2023-10-29')
-        await state.update_data(nm_usual=count_of_normal_tickets)
         await state.set_state(AdminStates.enter_event_date)
     else:
         await message.answer('Попробуйте ввести количество цифрой. Например: 150')
@@ -126,9 +140,9 @@ async def handle_prices_range(message: Message, state: FSMContext):
         data = await state.get_data()
         str_prices = [str(i) for i in data["prices_range"]]
         buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
-        await message.answer(f'Хорошо! Вы добавляете мероприятие {data["name"]}\n'
-                             f'Количество билетов:\nОбычных:{data["nm_usual"]}\nПрайм:{data["nm_prime"]}\n\n'
-                             f'Дата:{data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}', reply_markup=buttons)
+        await message.answer(f'Хорошо! Вы добавляете мероприятие «{data["name"]}»\n\n'
+                             f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\nДепозитных: {data["nm_deposit"]}\n\n'
+                             f'Дата: {data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}', reply_markup=buttons)
         await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
     except:
         await message.answer('Попробуйте ввести список еще раз')
@@ -146,7 +160,6 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
         for i in data:
             print(f'{i}: {data[i]}')
         print(data)
-        # TODO: добавить в дату nm_deposit для засылки в базу
         await create_event(name=data['name'],
                            nm_prime=data['nm_prime'],
                            nm_usual=data['nm_usual'],
