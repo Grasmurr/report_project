@@ -215,6 +215,11 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.set_state(PromouterStates.enter_price)
 
 
+@dp.message(PromouterStates.enter_price, F.text == 'Назад')
+async def back_from_choose_price_for_ticket(message: Message, state: FSMContext):
+    await enter_ticket_type(message, state)
+
+
 @dp.message(PromouterStates.enter_price)
 async def confirm_participant(message: Message, state: FSMContext):
     data = await state.get_data()
