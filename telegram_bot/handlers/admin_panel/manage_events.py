@@ -73,8 +73,10 @@ async def create_count_of_prime_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_prime_tickets = int(message.text)
         data = await state.get_data()
-        await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия «{data["name"]}».\n\n'
-                              'Теперь введите число обычных билетов, которое вы хотите создать для этого мероприятия:')
+        await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов для мероприятия '
+                             f'«{data["name"]}».\n\n'
+                             'Теперь введите число обычных билетов, которое вы хотите создать '
+                             'для этого мероприятия:')
         await state.update_data(nm_prime=count_of_prime_tickets)
         await state.set_state(AdminStates.enter_count_of_event_normal)
     else:
@@ -82,15 +84,17 @@ async def create_count_of_prime_tickets(message: Message, state: FSMContext):
 
 
 @dp.message(AdminStates.enter_count_of_event_normal)
-async def create_count_of_normal_tickets (message: Message, state: FSMContext):
+async def create_count_of_normal_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_normal_tickets = int(message.text)
         await state.update_data(nm_usual=count_of_normal_tickets)
         await state.set_state(AdminStates.enter_count_of_event_deposit)
         await message.answer(f"Вы создаете {count_of_normal_tickets} обычных билетов. "
-                             f"Теперь введите число депозитных билетов, которое вы хотите создать для этого мероприятия:")
+                             f"Теперь введите число депозитных билетов, которое вы хотите создать для "
+                             f"этого мероприятия:")
     else:
         await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+
 
 @dp.message(AdminStates.enter_count_of_event_deposit)
 async def create_count_of_normal_tickets(message: Message, state: FSMContext):
@@ -119,10 +123,10 @@ async def create_event_date(message: Message, state: FSMContext):
         event_date_str = event_date.strftime('%Y-%m-%d')
         await state.update_data(event_date=event_date_str)
 
-        await message.answer(f'Дата мероприятия установлена на {event_date_str}\n\nА теперь, введите список цен, которое вы хотите предусмотреть:'
+        await message.answer(f'Дата мероприятия установлена на {event_date_str}\n\nА теперь, введите список цен, '
+                             f'которое вы хотите предусмотреть:'
                              '\n\nНапример:\n1500\n2000\n2500\n\nКаждое с новой строки!')
         await state.set_state(AdminStates.enter_prices_range)
-
     except ValueError:
         await message.answer('Пожалуйста, введите дату в формате YYYY-MM-DD. Например: 2023-10-29')
 
@@ -141,8 +145,10 @@ async def handle_prices_range(message: Message, state: FSMContext):
         str_prices = [str(i) for i in data["prices_range"]]
         buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
         await message.answer(f'Хорошо! Вы добавляете мероприятие «{data["name"]}»\n\n'
-                             f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\nДепозитных: {data["nm_deposit"]}\n\n'
-                             f'Дата: {data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}', reply_markup=buttons)
+                             f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\n'
+                             f'Депозитных: {data["nm_deposit"]}\n\n'
+                             f'Дата: {data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}',
+                             reply_markup=buttons)
         await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
     except:
         await message.answer('Попробуйте ввести список еще раз')

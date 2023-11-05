@@ -183,7 +183,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 
 
 @dp.message(PromouterStates.enter_ticket_type)
-async def choose_price_for_ticket(message: Message, state: FSMContext):
+async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
     if ticket_type != 'Обычный' and ticket_type != 'Прайм' and  ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
@@ -214,10 +214,6 @@ async def choose_price_for_ticket(message: Message, state: FSMContext):
                          reply_markup=markup)
     await state.set_state(PromouterStates.enter_price)
 
-@dp.message(PromouterStates.enter_price, F.text == 'Назад')
-async def back_from_choose_price_for_ticket(message: Message, state: FSMContext):
-    await enter_ticket_type(message, state)
-
 
 @dp.message(PromouterStates.enter_price)
 async def confirm_participant(message: Message, state: FSMContext):
@@ -233,7 +229,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.update_data(participant_ticket_price=participant_ticket_price)
 
     await state.get_data()
-
+    print (data)
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
     participant_gender = data ['participant_gender']
@@ -277,14 +273,15 @@ async def create_image(text):
 async def registration_ends(message: Message, state: FSMContext):
     data = await state.get_data()
 
-    num = random.randint(100, 10000)
+    num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
+                                                          ticket_type=data['ticket_type'])
 
     temp_file_path = await create_image(num)
 
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
     os.remove(temp_file_path)
-    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime'
+    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data['ticket_type'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
     print (f'выводим дату:{data}')
     await api_methods.create_ticket(event=data['participant_event'],
@@ -300,23 +297,21 @@ async def registration_ends(message: Message, state: FSMContext):
                                     phone_number=data['participant_phone_number']
                                     )
 
-    markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                       "Оформить возврат",
-                                                       "Посмотреть количество билетов в наличии")
-    await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
+    await message.answer(text='Спасибо! Участник зарегистрирован')
+    await accepted_promouter_panel(message, state)
     ticket_info = await api_methods.get_ticket_by_number_or_type(data['participant_event'])
-
     await update_gdrive(data['participant_event'], ticket_info)
 
-    await state.set_state(PromouterStates.main_accepted_promouter_panel)
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Отменить регистрацию этого билета")
 async def cancel_participant_regintration(message: Message, state: FSMContext):
     await accepted_promouter_panel(message, state)
 
+
 @dp.message(PromouterStates.confirm_participant, F.text == "Изменить тип билета")
 async def change_ticket_type(message: Message, state: FSMContext):
     await enter_ticket_type(message, state)
+
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Ввести данные участника заново")
 async def remake_registration(message: Message, state: FSMContext):
