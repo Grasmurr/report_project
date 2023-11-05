@@ -72,7 +72,7 @@ async def choose_format_for_uploading_data(message: Message, state: FSMContext):
         markup = chat_backends.create_keyboard_buttons('Выбрать другое мероприятие',
                                                        'Вернуться в меню админа')
         await message.answer(text="На это мероприятие не было куплено билетов",
-                             markup=markup)
+                             reply_markup=markup)
         await state.set_state(AdminStates.upload_data_in_format_final)
 
     else:
@@ -93,12 +93,14 @@ def create_table(data, event, file_format):
         "ticket_number": "Номер билета",
         "ticket_holder_name": "Имя",
         "ticket_holder_surname": "Фамилия",
+        'ticket_holder_sex': "Пол",
         "ticket_type": "Тип билета",
         "date_of_birth": "Дата рождения",
         "price": "Цена",
         "educational_program": "Образовательная программа",
         "educational_course": "Курс",
-        "phone_number": "Номер телефона"
+        "phone_number": "Номер телефона",
+        "is_refunded": "Возвращен ли билет?"
     }
 
     df = pd.DataFrame.from_records(data)
