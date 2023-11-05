@@ -146,9 +146,11 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
         for i in data:
             print(f'{i}: {data[i]}')
         print(data)
+        # TODO: добавить в дату nm_deposit для засылки в базу
         await create_event(name=data['name'],
                            nm_prime=data['nm_prime'],
                            nm_usual=data['nm_usual'],
+                           nm_deposit=data['nm_deposit'],
                            event_date=data['event_date'],
                            prices=data['prices_range'])
         api_methods.create_sheet(data['name'])
