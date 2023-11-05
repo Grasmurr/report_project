@@ -28,6 +28,7 @@ class Ticket(models.Model):
     ticket_number = models.IntegerField()
     ticket_holder_name = models.CharField(max_length=255)
     ticket_holder_surname = models.CharField(max_length=255)
+    ticket_holder_sex = models.CharField(null=True)
     ticket_type = models.CharField(
         max_length=10,
         choices=TICKET_TYPE_CHOICES,

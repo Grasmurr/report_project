@@ -43,6 +43,11 @@ class AdminStates(StatesGroup):
     choose_event_to_show = State()
     choose_action_to_show_or_hide = State()
 
+    begin_mailing = State()
+    mailing_with_text = State()
+    mailing_with_photo = State()
+    mailing_with_file = State()
+
 
 
 class PromouterStates(StatesGroup):
