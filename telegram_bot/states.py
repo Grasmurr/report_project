@@ -71,3 +71,5 @@ class PromouterStates(StatesGroup):
     enter_number_of_ticket_for_refund = State()
     confirm_ticket_data_for_refund = State()
     get_admin_confirmation_to_refund = State()
+    choose_event_for_info = State()
+    tickets_info_final = State()

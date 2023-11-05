@@ -183,7 +183,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 
 
 @dp.message(PromouterStates.enter_ticket_type)
-async def confirm_participant(message: Message, state: FSMContext):
+async def choose_price_for_ticket(message: Message, state: FSMContext):
     ticket_type = message.text
     if ticket_type != 'Обычный' and ticket_type != 'Прайм' and  ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
@@ -214,6 +214,10 @@ async def confirm_participant(message: Message, state: FSMContext):
                          reply_markup=markup)
     await state.set_state(PromouterStates.enter_price)
 
+@dp.message(PromouterStates.enter_price, F.text == 'Назад')
+async def back_from_choose_price_for_ticket(message: Message, state: FSMContext):
+    await enter_ticket_type(message, state)
+
 
 @dp.message(PromouterStates.enter_price)
 async def confirm_participant(message: Message, state: FSMContext):
@@ -229,7 +233,7 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.update_data(participant_ticket_price=participant_ticket_price)
 
     await state.get_data()
-    print (data)
+
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
     participant_gender = data ['participant_gender']
@@ -297,7 +301,8 @@ async def registration_ends(message: Message, state: FSMContext):
                                     )
 
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                   "Оформить возврат")
+                                                       "Оформить возврат",
+                                                       "Посмотреть количество билетов в наличии")
     await message.answer(text='Спасибо! Участник зарегистрирован', reply_markup=markup)
     ticket_info = await api_methods.get_ticket_by_number_or_type(data['participant_event'])
 

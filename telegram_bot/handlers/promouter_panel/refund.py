@@ -96,7 +96,8 @@ async def refund_confirmation(message: Message, state: FSMContext):
         # if:
             price = 2000
             markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                   "Оформить возврат")
+                                                       "Оформить возврат",
+                                                       "Посмотреть количество билетов в наличии")
             await message.answer(text=f"Ваша заявка на возврат билета одобрена администратором. "
                                       f"Пожалуйста, верните {price} рублей покупателю данного билета.",
                                  reply_markup=markup)
