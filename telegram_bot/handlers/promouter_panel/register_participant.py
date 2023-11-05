@@ -17,7 +17,6 @@ from telegram_bot.repository import api_methods
 
 from telegram_bot.gdrive.api_methods import update_gdrive
 
-
 from PIL import Image, ImageFont, ImageDraw
 
 
@@ -84,14 +83,15 @@ def check_participant_data(name, surname, phone_number, birth_date, course):
 
 
 @dp.message(PromouterStates.enter_personal_data_of_participant)
-async def enter_education_program_of_participant(message: Message, state: FSMContext):
+async def enter_sex_of_participant(message: Message, state: FSMContext):
     participant_data = message.text
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
-    if len(data_blocks) != 4 and data_blocks != "Назад":
-        await message.answer('Кажется, вы ввели данные об участнике в неверном формате! '
-                             'Обратите внимание на форму выше!')
-        return
+    if message.text != "Назад" and message.text != "Ввести данные участника заново":
+        if len(data_blocks) != 4:
+            await message.answer('Кажется, вы ввели данные об участнике в неверном формате! '
+                                 'Обратите внимание на форму выше!')
+            return
     print(data_blocks[0])
     participant_name = data_blocks[0].split()[0]
     print(participant_name)
@@ -122,12 +122,14 @@ async def enter_education_program_of_participant(message: Message, state: FSMCon
     markup = chat_backends.create_keyboard_buttons("Мужской", "Женский", "Назад")
     await message.answer(text='Укажите пол участника', reply_markup=markup)
 
+
 @dp.message(PromouterStates.enter_participant_gender, F.text == 'Назад')
 async def back_from_enter_education_program_of_participant(message: Message, state: FSMContext):
     await enter_personal_data_of_participant(message, state)
 
+
 @dp.message(PromouterStates.enter_participant_gender, F.text.in_(["Мужской", "Женский"]))
-async def back_from_enter_education_program_of_participant(message: Message, state: FSMContext):
+async def enter_education_program_of_participant(message: Message, state: FSMContext):
     ticket_holder_sex = message.text
     await state.update_data(participant_gender=ticket_holder_sex)
     await state.set_state(PromouterStates.enter_education_program_of_participant)
@@ -140,7 +142,9 @@ async def back_from_enter_education_program_of_participant(message: Message, sta
 
 @dp.message(PromouterStates.enter_education_program_of_participant, F.text == 'Назад')
 async def back_from_enter_education_program_of_participant(message: Message, state: FSMContext):
-    await enter_personal_data_of_participant(message, state)
+    await state.set_state(PromouterStates.enter_participant_gender)
+    markup = chat_backends.create_keyboard_buttons("Мужской", "Женский", "Назад")
+    await message.answer(text='Укажите пол участника', reply_markup=markup)
 
 
 @dp.message(PromouterStates.enter_education_program_of_participant)
@@ -149,12 +153,12 @@ async def enter_ticket_type(message: Message, state: FSMContext):
                'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ', 'РиСО', 'Социология',
                'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП",
                'Не ВШЭ']
-    if message.text not in ep_list and message.text != "Изменить тип билета":
+    if message.text not in ep_list and message.text != "Изменить тип билета" and  message.text != "Назад":
         await message.answer('Кажется вы ввели название образовательной программы с '
                              'клавиатуры. Пожалуйста, используйте кнопки')
         return
 
-    if message.text == "Изменить тип билета":
+    if message.text == "Изменить тип билета" or message.text == "Назад":
         data = await state.get_data()
         participant_ep = data['participant_ep']
     else:
@@ -171,10 +175,10 @@ async def enter_ticket_type(message: Message, state: FSMContext):
     nm_deposit = event_data['data'][0]['nm_deposit']
 
     markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
-    await message.answer(text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось {nm_deposit})',
-                         reply_markup=markup)
+    await message.answer(
+        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось {nm_deposit})',
+        reply_markup=markup)
     await state.set_state(PromouterStates.enter_ticket_type)
-
 
 
 @dp.message(PromouterStates.enter_ticket_type, F.text == 'Назад')
@@ -197,8 +201,10 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Прайм' and nm_prime == 0) or (ticket_type == 'Обычный' and nm_usual == 0) or (ticket_type == 'Депозит' and nm_deposit == 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})', f'Депозит ({nm_deposit})', 'Назад')
+    if (ticket_type == 'Прайм' and nm_prime == 0) or (ticket_type == 'Обычный' and nm_usual == 0) or (
+            ticket_type == 'Депозит' and nm_deposit == 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
+                                                       f'Депозит ({nm_deposit})', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
             reply_markup=markup)
@@ -234,10 +240,10 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.update_data(participant_ticket_price=participant_ticket_price)
 
     await state.get_data()
-    print (data)
+    print(data)
     participant_name = data['participant_name']
     participant_surname = data['participant_surname']
-    participant_gender = data ['participant_gender']
+    participant_gender = data['participant_gender']
     participant_number = data['participant_number']
     participant_date_of_birth = data["participant_date_of_birth"]
     participant_course = data['participant_course']
@@ -246,7 +252,8 @@ async def confirm_participant(message: Message, state: FSMContext):
     participant_event = data['participant_event']
     ticket_type = data['ticket_type']
 
-    markup = chat_backends.create_keyboard_buttons('Подтвердить', "Отменить регистрацию этого билета", "Изменить тип билета",'Ввести данные участника заново')
+    markup = chat_backends.create_keyboard_buttons('Подтвердить', "Отменить регистрацию этого билета",
+                                                   "Изменить тип билета", 'Ввести данные участника заново')
     await message.answer(text=f'Подтвердить регистрацию участника на мероприятие "{participant_event}"?\n\n'
                               f'Имя Фамилия : {participant_name} {participant_surname}\n'
                               f'Пол: {participant_gender}\n'
@@ -286,9 +293,10 @@ async def registration_ends(message: Message, state: FSMContext):
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
     os.remove(temp_file_path)
-    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data['ticket_type'] == 'Прайм' else 'nm_deposit'
+    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data[
+                                                                                  'ticket_type'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
-    print (f'выводим дату:{data}')
+    print(f'выводим дату:{data}')
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
                                     name=data['participant_name'],
@@ -321,4 +329,3 @@ async def change_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.confirm_participant, F.text == "Ввести данные участника заново")
 async def remake_registration(message: Message, state: FSMContext):
     await enter_personal_data_of_participant(message, state)
-

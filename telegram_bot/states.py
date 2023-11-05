@@ -18,6 +18,7 @@ class AdminStates(StatesGroup):
     enter_prices_range = State()
     continue_to_prices_range = State()
     saving_or_editing_from_the_beginning = State()
+    enter_start_number = State()
 
     upload_data = State()
     upload_data_in_format = State()

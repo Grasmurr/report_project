@@ -108,12 +108,25 @@ async def create_count_of_normal_tickets(message: Message, state: FSMContext):
         await message.answer(f'Хорошо. Вы создаете {count_of_prime_tickets} прайм билетов, '
                              f'{count_of_normal_tickets} обычных билетов, '
                              f'а также {count_of_deposit_tickets} депозитных билетов '
-                             f'для мероприятия «{name_of_event}». '
-                             f'\n\nПожалуйста, введите дату в '
+                             f'для мероприятия «{name_of_event}».\n\n'
+                             f'С какого номера начинать генерацию билетов?')
+        await state.set_state(AdminStates.enter_start_number)
+    else:
+        await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+
+
+@dp.message(AdminStates.enter_start_number)
+async def create_start_number(message: Message, state: FSMContext):
+    if message.text.isdigit():
+        start_number = int(message.text)
+        await state.update_data(ticket_number_start=start_number)
+        await message.answer(f'Отсчет номеров билетов будет начинаться с {start_number}.\n\n'
+                             f'Пожалуйста, введите дату в '
                              f'формате YYYY-MM-DD. Например: 2023-10-29')
         await state.set_state(AdminStates.enter_event_date)
     else:
         await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+        return
 
 
 @dp.message(AdminStates.enter_event_date)
@@ -147,7 +160,9 @@ async def handle_prices_range(message: Message, state: FSMContext):
         await message.answer(f'Хорошо! Вы добавляете мероприятие «{data["name"]}»\n\n'
                              f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\n'
                              f'Депозитных: {data["nm_deposit"]}\n\n'
-                             f'Дата: {data["event_date"]}\n\nЦеновой диапазон: {"-".join(str_prices)}',
+                             f'Номера билетов будут начинаться с {data["ticket_number_start"]}\n\n'
+                             f'Дата: {data["event_date"]}\n\n'
+                             f'Ценовой диапазон: {"-".join(str_prices)}',
                              reply_markup=buttons)
         await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
     except:
@@ -157,16 +172,13 @@ async def handle_prices_range(message: Message, state: FSMContext):
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
 async def success_notification_and_recreate(message: Message, state: FSMContext):
     if message.text == 'Продолжить':
-        markup = chat_backends.create_keyboard_buttons("Управление мероприятиями",
-                                                       "Оформить возврат",
-                                                       "Cделать выгрузку данных",
-                                                       "Назад")
-        await message.answer('Мероприятие было успешно создано!', reply_markup=markup)
+        await message.answer('Мероприятие было успешно создано!')
         data = await state.get_data()
         for i in data:
             print(f'{i}: {data[i]}')
         print(data)
         await create_event(name=data['name'],
+                           ticket_number_start=data['ticket_number_start'],
                            nm_prime=data['nm_prime'],
                            nm_usual=data['nm_usual'],
                            nm_deposit=data['nm_deposit'],
@@ -177,5 +189,9 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
         events = await get_all_events()
         await message.answer(text=f'Вы успешно создали мероприятие: {events}')
         await state.set_state(AdminStates.main)
-    else:
+        await admin_menu (message, state)
+    elif message.text=='Ввести данные заново':
         await create_new_event(message, state)
+    else:
+        await message.answer(text="Кажется, вы нажали не туда. Пожалуйста, воспользуйтесь кнопками с клавиатуры")
+
