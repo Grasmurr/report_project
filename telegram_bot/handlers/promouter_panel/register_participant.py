@@ -296,6 +296,23 @@ async def registration_ends(message: Message, state: FSMContext):
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data[
                                                                                   'ticket_type'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
+
+    count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
+    print(count_of_ticket_to_check)
+
+    nm_prime_to_check = count_of_ticket_to_check['data'][0]['nm_prime']
+    nm_usual_to_check = count_of_ticket_to_check['data'][0]['nm_usual']
+    nm_deposit_to_check = count_of_ticket_to_check['data'][0]['nm_deposit']
+
+    if nm_prime_to_check == 0 or nm_usual_to_check == 0 or nm_deposit_to_check == 0:
+        await bot.send_message(chat_id=572319915,
+                               text=f'Возможно, вы хотите довыпустить билеты для мероприятия «{data["participant_event"]}»\n\n'
+                                    f'На данный момент в наличии:\n'
+                                    f'Прайм: {nm_prime_to_check}\n'
+                                    f'Обычных: {nm_usual_to_check}\n'
+                                    f'Депозитных: {nm_deposit_to_check}\n\n'
+                                    f'Для дополнительной эмиссии билетов перейдите в раздел «Управление мероприятиями» → «Добавить билеты»')
+
     print(f'выводим дату:{data}')
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
