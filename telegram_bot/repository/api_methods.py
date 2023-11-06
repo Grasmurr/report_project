@@ -179,12 +179,13 @@ async def update_ticket_number(event_name, field, action):
     await send_to_api(endpoint, method='POST')
 
 
-async def update_event_data(name, nm_prime=None, nm_usual=None, event_date=None, prices=None):
+async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None, event_date=None, prices=None):
     endpoint = f'event_prices/{name}/'
     data = {
         'name': name,
         'nm_prime': nm_prime,
         'nm_usual': nm_usual,
+        'nm_deposit': nm_deposit,
         'date_of_event': event_date,
         'prices': prices
     }

@@ -94,7 +94,10 @@ async def handle_ticket_number(message: Message, state: FSMContext):
                                                             ticket_number=number_to_refund,
                                                             ticket_type=data['type_to_refund'])
     print(exists)
-    if exists['data'][0]['is_refunded']:
+    if not exists['data']:
+        await message.answer('Кажется, такого билета нет в базе!\n\nПопробуйте ввести данные заново!')
+        await ticket_refund_start(message, state)
+    elif exists['data'][0]['is_refunded']:
         await message.answer("Этот билет уже был возвращен")
         await admin_menu(message, state)
     elif exists['data']:
@@ -116,9 +119,7 @@ async def handle_ticket_number(message: Message, state: FSMContext):
         else:
             await message.answer('До мероприятия осталось менее 3 дней, поэтому возврат невозможен!')
             await admin_menu(message, state)
-    else:
-        await message.answer('Кажется, такого билета нет в базе!\n\nПопробуйте ввести данные заново!')
-        await ticket_refund_start(message, state)
+
 
 
 @dp.message(AdminStates.approve_ticket_refund)

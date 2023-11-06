@@ -35,6 +35,7 @@ class AdminStates(StatesGroup):
     enter_number_of_tickets_for_addition = State()
     enter_count_of_event_normal_for_addition = State()
     enter_count_of_event_prime_for_addition = State()
+    enter_count_of_event_deposit_for_addition = State()
     confirm_event_addition_tickets = State()
     confirm_ticket_addition = State()
 
