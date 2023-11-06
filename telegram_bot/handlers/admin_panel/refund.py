@@ -111,23 +111,30 @@ async def handle_ticket_number(message: Message, state: FSMContext):
         coefficent_to_return = await chat_backends.define_refund_percent(data['event_to_refund'])
         if coefficent_to_return:
             return_sum = int(id_data["data"][0]["price"] * coefficent_to_return)
+
             await state.update_data(return_sum=return_sum)
             await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.\n'
-                             f'\nИмя: {name}\nФамилия: {surname}\n'
-                             f'Тип билета: {data["type_to_refund"]}\n\nСумма для возврата: {return_sum}\n\nПродолжить?', reply_markup=markup)
+                                 f'\nИмя: {name}\nФамилия: {surname}\n'
+                                 f'Тип билета: {data["type_to_refund"]}\n\nСумма для возврата: {return_sum}'
+                                 f'\n\nПродолжить?', reply_markup=markup)
             await state.set_state(AdminStates.approve_ticket_refund)
         else:
             await message.answer('До мероприятия осталось менее 3 дней, поэтому возврат невозможен!')
             await admin_menu(message, state)
 
 
-
 @dp.message(AdminStates.approve_ticket_refund)
 async def final_the_refund(message: Message, state: FSMContext):
     data = await state.get_data()
+    id_data = await api_methods.get_ticket_by_number_or_type(event=data['event_to_refund'],
+                                                            ticket_number=data['number_to_refund'],
+                                                            ticket_type=data['type_to_refund'])
+
+    new_sum = id_data["data"][0]["price"] - data['return_sum']
+
     await api_methods.return_ticket(ticket_number=data['number_to_refund'],
                                     event=data['event_to_refund'],
-                                    ticket_type=data['type_to_refund'], new_price=data['return_sum'])
+                                    ticket_type=data['type_to_refund'], new_price=new_sum)
     field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
     await message.answer('Возврат произошел успешно!')
@@ -137,3 +144,6 @@ async def final_the_refund(message: Message, state: FSMContext):
     await update_gdrive(data['event_to_refund'], ticket_info)
 
     await admin_menu(message, state)
+
+
+

@@ -10,8 +10,10 @@ from telegram_bot.states import AdminStates
 from telegram_bot.repository import api_methods
 from telegram_bot.handlers import main_menu
 
+from telegram_bot.assets.configs import config
 
-@dp.message(F.text == '/admin')
+
+@dp.message(F.text == '/admin', F.from_user.id == config.ADMIN_ID)
 async def admin_menu(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Управление мероприятиями",
                                                    "Оформить возврат",

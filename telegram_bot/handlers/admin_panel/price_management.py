@@ -1,8 +1,7 @@
 from telegram_bot.loader import dp, bot
 from aiogram.types import \
     (Message,
-     ReplyKeyboardRemove
-     )
+     ReplyKeyboardRemove)
 from telegram_bot.helpers import chat_backends
 from aiogram import F
 from aiogram.fsm.context import FSMContext
@@ -12,6 +11,7 @@ from telegram_bot.repository.api_methods import create_event, get_all_events
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
 from telegram_bot.repository import api_methods
+
 
 @dp.message(AdminStates.manage_events, F.text == 'Изменить ценовой диапазон')
 async def change_price_range(message: Message, state: FSMContext):
@@ -37,7 +37,8 @@ async def enter_event_name_for_price(message: Message, state: FSMContext):
     await state.update_data(event_name=event_name)
     await state.set_state(AdminStates.enter_price_range_for_change)
     await message.answer('Хорошо! введите список цен, которое вы хотите предусмотреть:'
-                         '\n\nНапример:\n1500\n2000\n2500\n\nКаждое с новой строки!', reply_markup=ReplyKeyboardRemove())
+                         '\n\nНапример:\n1500\n2000\n2500\n\nКаждое с новой строки!',
+                         reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message(AdminStates.enter_price_range_for_change)

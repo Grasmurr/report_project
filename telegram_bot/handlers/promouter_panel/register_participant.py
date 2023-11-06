@@ -15,6 +15,8 @@ from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_
 from telegram_bot.repository.api_methods import get_all_events
 from telegram_bot.repository import api_methods
 
+from telegram_bot.assets.configs import config
+
 from telegram_bot.gdrive.api_methods import update_gdrive
 
 from PIL import Image, ImageFont, ImageDraw
@@ -265,7 +267,7 @@ async def confirm_participant(message: Message, state: FSMContext):
                               f'Цена билета: {participant_ticket_price}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
 
-
+# TODO: Что делать с дизайном билетов?
 async def create_image(text):
     with open('/usr/src/telegram_bot/handlers/promouter_panel/assets/ticket.jpg', 'rb') as file:
         image = Image.open(file).copy()
@@ -305,13 +307,14 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_deposit_to_check = count_of_ticket_to_check['data'][0]['nm_deposit']
 
     if nm_prime_to_check == 0 or nm_usual_to_check == 0 or nm_deposit_to_check == 0:
-        await bot.send_message(chat_id=572319915,
+        await bot.send_message(chat_id=config.ADMIN_ID,
                                text=f'Возможно, вы хотите довыпустить билеты для мероприятия «{data["participant_event"]}»\n\n'
                                     f'На данный момент в наличии:\n'
                                     f'Прайм: {nm_prime_to_check}\n'
                                     f'Обычных: {nm_usual_to_check}\n'
                                     f'Депозитных: {nm_deposit_to_check}\n\n'
-                                    f'Для дополнительной эмиссии билетов перейдите в раздел «Управление мероприятиями» → «Добавить билеты»')
+                                    f'Для дополнительной эмиссии билетов перейдите в раздел '
+                                    f'«Управление мероприятиями» → «Добавить билеты»')
 
     print(f'выводим дату:{data}')
     await api_methods.create_ticket(event=data['participant_event'],

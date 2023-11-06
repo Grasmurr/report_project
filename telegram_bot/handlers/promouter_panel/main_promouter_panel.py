@@ -23,6 +23,8 @@ from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 from telegram_bot.repository import api_methods
 
+from telegram_bot.assets.configs import config
+
 
 @dp.message(PromouterStates.begin_registration)
 async def identify_promouter(message: Message, state: FSMContext):
@@ -71,7 +73,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         builder.button(text='Отказать', callback_data=f'decline{message.from_user.id}')
         markup = builder.as_markup()
 
-        await bot.send_message(chat_id=572319915,
+        await bot.send_message(chat_id=config.ADMIN_ID,
                                text=f'Подтвердить регистрацию промоутера? \n\nИмя: {message.from_user.full_name}'
                                     f'\nUsername: {usname}'
                                     f'\nНомер телефона: +{int(phone_number)}',
