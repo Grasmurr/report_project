@@ -94,7 +94,10 @@ async def handle_ticket_number(message: Message, state: FSMContext):
                                                             ticket_number=number_to_refund,
                                                             ticket_type=data['type_to_refund'])
     print(exists)
-    if exists['data']:
+    if exists['data'][0]['is_refunded']:
+        await message.answer("Этот билет уже был возвращен")
+        await admin_menu(message, state)
+    elif exists['data']:
         id_data = exists
         await state.update_data(number_to_refund=number_to_refund)
         markup = chat_backends.create_keyboard_buttons('Продолжить', 'Назад')
