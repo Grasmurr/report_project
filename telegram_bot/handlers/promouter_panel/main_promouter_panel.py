@@ -74,7 +74,7 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=config.ADMIN_ID,
-                               text=f'Подтвердить регистрацию промоутера? \n\nИмя: {message.from_user.full_name}'
+                               text=f'Подтвердить регистрацию представителя? \n\nИмя: {message.from_user.full_name}'
                                     f'\nUsername: {usname}'
                                     f'\nНомер телефона: +{int(phone_number)}',
                                reply_markup=markup)
@@ -99,7 +99,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
                                                        "Посмотреть количество билетов в наличии")
 
         await bot.send_message(chat_id=user_id,
-                               text=f'Добро пожаловать в панель промоутера',
+                               text=f'Добро пожаловать в панель представителя',
                                reply_markup=markup)
     else:
         await bot.send_message(chat_id=ans[7:], text='Админ отказал вам в заявке!')
@@ -108,7 +108,7 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
         markup = create_keyboard_buttons('Зарегистрироваться')
         await bot.send_message(chat_id=ans[7:],
                                text=f'Добро пожаловать в телеграм бот агентства Гамма! '
-                               f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
+                               f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
                                reply_markup=markup)
 
 
@@ -117,6 +117,6 @@ async def accepted_promouter_panel(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                    "Оформить возврат",
                                                    "Посмотреть количество билетов в наличии")
-    await message.answer(text=f'Добро пожаловать в панель промоутера',
+    await message.answer(text=f'Добро пожаловать в панель представителя',
                          reply_markup=markup)
 

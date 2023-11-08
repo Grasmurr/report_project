@@ -151,7 +151,7 @@ async def final_the_refund(message: Message, state: FSMContext):
         markup = builder.as_markup()
 
         await bot.send_message(chat_id=config.ADMIN_ID,
-                               text=f'Уважаемый админ!\n\nОт промоутера {promouter_name} пришла заявка на возврат '
+                               text=f'От представителя {promouter_name} пришла заявка на возврат '
                                     f'билета на мероприятие: {event_name}\nТип билета: {type_to_refund}\nНомер '
                                     f'билета: {number_to_refund}\nИмя: {name}\nФамилия: {surname}\n\nСумма для '
                                     f'возврата: {return_sum}\n\nПодтвердить?', reply_markup=markup)
@@ -193,7 +193,7 @@ async def handle_refund(call: CallbackQuery, state: FSMContext):
             await bot.send_message(chat_id=call.message.chat.id, text='Вы подтвердили эту заявку!')
             await bot.send_message(chat_id=promouter_id, text=f'Ваша заявка на возврат билета для участника {name} '
                                                               f'{surname} с номером билета {ticket_number} '
-                                                              f'была одобрена! \n\nВам нужно вернуть промоутеру сумму '
+                                                              f'была одобрена! \n\nВам нужно вернуть клиенту сумму '
                                                               f'{refund_amount}р.')
 
             id_data = await api_methods.get_ticket_by_number_or_type(event=event_name,

@@ -38,15 +38,15 @@ async def back_to_admin_menu(message: Message, state: FSMContext):
     buttons = chat_backends.create_keyboard_buttons('Назад')
     if type_to_mail == 'Текст':
         await state.set_state(AdminStates.mailing_with_text)
-        await message.answer('Хорошо! Отправьте текст, который вы собираетесь отправить промоутерам:',
+        await message.answer('Хорошо! Отправьте текст, который вы собираетесь отправить представителям:',
                              reply_markup=buttons)
     elif type_to_mail == 'Фото':
         await state.set_state(AdminStates.mailing_with_photo)
-        await message.answer('Хорошо! Отправьте фото, которое вы собираетесь отправить промоутерам (с подписью):',
+        await message.answer('Хорошо! Отправьте фото, которое вы собираетесь отправить представителям (с подписью):',
                              reply_markup=buttons)
     else:
         await state.set_state(AdminStates.mailing_with_file)
-        await message.answer('Хорошо! Отправьте файл, который вы собираетесь отправить промоутерам (с подписью):',
+        await message.answer('Хорошо! Отправьте файл, который вы собираетесь отправить представителям (с подписью):',
                              reply_markup=buttons)
 
 

@@ -43,5 +43,5 @@ async def promouter_menu(message: Message, state: FSMContext):
     else:
         await state.set_state(PromouterStates.begin_registration)
         await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
-                             f'Для начала работы необходимо зарегистрироваться в качестве промоутера!',
+                             f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
                              reply_markup=markup)

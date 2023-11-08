@@ -58,5 +58,5 @@ async def back_from_sending_info_to_menu(message: Message, state: FSMContext):
         markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
                                                        "Оформить возврат",
                                                        "Посмотреть количество билетов в наличии")
-        await message.answer(text=f'Добро пожаловать в панель промоутера',
+        await message.answer(text=f'Добро пожаловать в панель представителя',
                              reply_markup=markup)

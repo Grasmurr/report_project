@@ -31,7 +31,7 @@ async def event_delete_start(message: Message, state: FSMContext):
     event_names = [event['name'] for event in events['data']]
     markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
     await state.set_state(AdminStates.choose_event_to_show)
-    await message.answer(text='Выберите мероприятие, которое вы хотите показать/скрыть для промоутеров:',
+    await message.answer(text='Выберите мероприятие, которое вы хотите показать/скрыть для представителей:',
                          reply_markup=markup)
 
 
@@ -45,7 +45,7 @@ async def choose_action_for_event_for_promouters(message: Message, state: FSMCon
     event_name = message.text
     await state.update_data(event_name=event_name)
     markup = chat_backends.create_keyboard_buttons('Скрыть', 'Показать', 'Назад')
-    await message.answer('Хорошо! Вы хотите скрыть или показать это мероприятие для промоутеров?', reply_markup=markup)
+    await message.answer('Хорошо! Вы хотите скрыть или показать это мероприятие для представителей?', reply_markup=markup)
     await state.set_state(AdminStates.choose_action_to_show_or_hide)
 
 
@@ -60,12 +60,12 @@ async def handle_action_for_event_to_hide_or_show(message: Message, state: FSMCo
     if action == 'Скрыть':
         data = await state.get_data()
         await api_methods.update_event_visibility(data['event_name'], is_hidden=True)
-        await message.answer(f'Хорошо! Вы скрыли мероприятие {data["event_name"]} для промоутеров!')
+        await message.answer(f'Хорошо! Вы скрыли мероприятие {data["event_name"]} для представителей!')
         await admin_menu(message, state)
     elif action == 'Показать':
         data = await state.get_data()
         await api_methods.update_event_visibility(data['event_name'], is_hidden=False)
-        await message.answer(f'Хорошо! Вы показали мероприятие {data["event_name"]} для промоутеров!')
+        await message.answer(f'Хорошо! Вы показали мероприятие {data["event_name"]} для представителей!')
         await admin_menu(message, state)
     else:
         markup = chat_backends.create_keyboard_buttons('Скрыть', 'Показать', 'Назад')
