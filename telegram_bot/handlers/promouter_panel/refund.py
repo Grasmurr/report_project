@@ -191,10 +191,15 @@ async def handle_refund(call: CallbackQuery, state: FSMContext):
         else:
             await bot.delete_message(message_id=call.message.message_id, chat_id=call.message.chat.id)
             await bot.send_message(chat_id=call.message.chat.id, text='Вы подтвердили эту заявку!')
+
+            builder = InlineKeyboardBuilder()
+            builder.button(text='Вернул!', callback_data=f'rfnded_{promouter_id}')
+            markup = builder.as_markup()
+
             await bot.send_message(chat_id=promouter_id, text=f'Ваша заявка на возврат билета для участника {name} '
                                                               f'{surname} с номером билета {ticket_number} '
                                                               f'была одобрена! \n\nВам нужно вернуть клиенту сумму '
-                                                              f'{refund_amount}р.')
+                                                              f'{refund_amount}р.', reply_markup=markup)
 
             id_data = await api_methods.get_ticket_by_number_or_type(event=event_name,
                                                                      ticket_number=ticket_number,
@@ -208,13 +213,32 @@ async def handle_refund(call: CallbackQuery, state: FSMContext):
 
             field = 'nm_usual' if ticket_type == 'Обычный' else 'nm_prime' if ticket_type == 'Прайм' else 'nm_deposit'
             await api_methods.update_ticket_number(event_name=event_name, action='increment', field=field)
-            await bot.send_message(chat_id=call.message.chat.id, text='Возврат произошел успешно!')
 
             ticket_info = await api_methods.get_ticket_by_number_or_type(event=event_name)
 
             await update_gdrive(event_name, ticket_info)
     except:
         await bot.send_message(chat_id=call.message.chat.id, text='Что-то пошло не так, обратитесь к разработчикам!')
+
+
+@dp.callback_query(lambda call: call.data.startswith('rfnded'))
+async def handle_refund_from_promouter(call: CallbackQuery, state: FSMContext):
+    ans, promouter_id = call.data.split('_')
+    data = call.message.text
+
+    participant_name_match = re.search(r"участника\s+([А-Я][а-я]+\s+[А-Я][а-я]+)", data).group(1)
+    ticket_number_match = int(re.search(r"номером билета\s+(\d+)", data).group(1))
+    refund_amount_match = int(re.search(r"сумму\s+(\d+)р", data).group(1))
+
+    promouter = await api_methods.get_promouter(promouter_id)
+    name = promouter['data'][0]['full_name']
+    await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+    await bot.send_message(chat_id=config.ADMIN_ID, text=f'Представитель {name} вернул участнику '
+                                                         f'{participant_name_match} с номером билета '
+                                                         f'{ticket_number_match} '
+                                                         f'сумму {refund_amount_match}р.!')
+    await bot.send_message(chat_id=promouter_id, text='Спасибо! Сообщение было отправлено админу!')
+
 
 
 
@@ -233,20 +257,20 @@ async def handle_refund(call: CallbackQuery, state: FSMContext):
 #         #                               f"Пожалуйста, обратитесь к администратору (@URL) для уточнения причины.",
 #         #                          reply_markup=markup)
 
-    #
-    # data = await state.get_data()
-    # await api_methods.return_ticket(ticket_number=data['number_to_refund'],
-    #                                 event=data['event_to_refund'],
-    #                                 ticket_type=data['type_to_refund'], new_price=data['return_sum'])
-    # field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Прайм' else 'nm_deposit'
-    # await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
-    # await message.answer('Возврат произошел успешно!')
-    #
-    # ticket_info = await api_methods.get_ticket_by_number_or_type(data['event_to_refund'])
-    #
-    # await update_gdrive(data['event_to_refund'], ticket_info)
-    #
-    # await accepted_promouter_panel(message, state)
+#
+# data = await state.get_data()
+# await api_methods.return_ticket(ticket_number=data['number_to_refund'],
+#                                 event=data['event_to_refund'],
+#                                 ticket_type=data['type_to_refund'], new_price=data['return_sum'])
+# field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Прайм' else 'nm_deposit'
+# await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
+# await message.answer('Возврат произошел успешно!')
+#
+# ticket_info = await api_methods.get_ticket_by_number_or_type(data['event_to_refund'])
+#
+# await update_gdrive(data['event_to_refund'], ticket_info)
+#
+# await accepted_promouter_panel(message, state)
 
 
 

@@ -174,8 +174,6 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
     if message.text == 'Продолжить':
         await message.answer('Мероприятие было успешно создано!')
         data = await state.get_data()
-        for i in data:
-            print(f'{i}: {data[i]}')
         print(data)
         await create_event(name=data['name'],
                            ticket_number_start=data['ticket_number_start'],
@@ -186,11 +184,10 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
                            prices=data['prices_range'])
         api_methods.create_sheet(data['name'])
 
-        events = await get_all_events()
-        await message.answer(text=f'Вы успешно создали мероприятие: {events}')
+        await message.answer(text=f'Вы успешно создали мероприятие: {data["name"]}')
         await state.set_state(AdminStates.main)
-        await admin_menu (message, state)
-    elif message.text=='Ввести данные заново':
+        await admin_menu(message, state)
+    elif message.text == 'Ввести данные заново':
         await create_new_event(message, state)
     else:
         await message.answer(text="Кажется, вы нажали не туда. Пожалуйста, воспользуйтесь кнопками с клавиатуры")

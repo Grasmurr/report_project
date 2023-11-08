@@ -91,7 +91,14 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     ans = call.data
     user_id = ans[5:]
+
     if ans[:5] == 'allow':
+        promouter = await api_methods.get_promouter(user_id)
+        name = promouter['data'][0]['full_name']
+
+        await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        await bot.send_message(chat_id=call.message.chat.id, text=f'Вы подтвердили заявку представителя {name}!')
+
         await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!')
         await state.set_state(PromouterStates.main_accepted_promouter_panel)
         markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
@@ -102,6 +109,8 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
                                text=f'Добро пожаловать в панель представителя',
                                reply_markup=markup)
     else:
+        await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+        await bot.send_message(chat_id=call.message.chat.id, text='Вы отказали в заявке представителю!')
         await bot.send_message(chat_id=ans[7:], text='Админ отказал вам в заявке!')
         await api_methods.delete_promouter(ans[7:])
         await state.set_state(PromouterStates.begin_registration)
