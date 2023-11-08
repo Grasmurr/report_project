@@ -91,13 +91,13 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     ans = call.data
     user_id = ans[5:]
-
     if ans[:5] == 'allow':
-
         await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!')
         await state.set_state(PromouterStates.main_accepted_promouter_panel)
         markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                       "Оформить возврат")
+                                                       "Оформить возврат",
+                                                       "Посмотреть количество билетов в наличии")
+
         await bot.send_message(chat_id=user_id,
                                text=f'Добро пожаловать в панель промоутера',
                                reply_markup=markup)
@@ -118,5 +118,5 @@ async def accepted_promouter_panel(message: Message, state: FSMContext):
                                                    "Оформить возврат",
                                                    "Посмотреть количество билетов в наличии")
     await message.answer(text=f'Добро пожаловать в панель промоутера',
-                           reply_markup=markup)
+                         reply_markup=markup)
 

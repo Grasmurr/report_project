@@ -193,8 +193,10 @@ class ToggleEventHiddenStatusView(View):
             is_hidden = data.get('is_hidden')  # Теперь это должно работать с JSON
 
             if is_hidden is not None and is_hidden in ['true', 'false']:
-                is_hidden = bool(is_hidden.capitalize())
-                event.is_hidden = is_hidden
+                if is_hidden == 'false':
+                    event.is_hidden = False
+                else:
+                    event.is_hidden = True
                 event.save()
                 return JsonResponse({'status': 'ok'})
             else:
