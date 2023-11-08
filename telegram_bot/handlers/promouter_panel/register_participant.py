@@ -295,6 +295,13 @@ async def registration_ends(message: Message, state: FSMContext):
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
     os.remove(temp_file_path)
+
+    count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
+
+    nm_prime_before_change = count_of_ticket_to_check['data'][0]['nm_prime']
+    nm_usual_before_change = count_of_ticket_to_check['data'][0]['nm_usual']
+    nm_deposit_before_change = count_of_ticket_to_check['data'][0]['nm_deposit']
+
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data[
                                                                                   'ticket_type'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
@@ -306,7 +313,9 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_usual_to_check = count_of_ticket_to_check['data'][0]['nm_usual']
     nm_deposit_to_check = count_of_ticket_to_check['data'][0]['nm_deposit']
 
-    if nm_prime_to_check == 0 or nm_usual_to_check == 0 or nm_deposit_to_check == 0:
+    if (nm_prime_to_check == 0 and nm_prime_to_check != nm_prime_before_change) or \
+            (nm_usual_to_check == 0 and nm_usual_before_change != nm_usual_to_check) or \
+            (nm_deposit_to_check == 0 and nm_deposit_before_change != nm_deposit_to_check):
         await bot.send_message(chat_id=config.ADMIN_ID,
                                text=f'Возможно, вы хотите довыпустить билеты для мероприятия «{data["participant_event"]}»\n\n'
                                     f'На данный момент в наличии:\n'
