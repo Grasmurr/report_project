@@ -1,4 +1,3 @@
-
 from telegram_bot.loader import dp, bot
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import \
@@ -22,7 +21,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from telegram_bot.helpers.chat_backends import create_keyboard_buttons
 
 from telegram_bot.repository import api_methods
-
 from telegram_bot.assets.configs import config
 
 
@@ -67,20 +65,19 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
         user_id = message.from_user.id
 
         await api_methods.update_promouter(user_id=user_id, username=usname, phone_number=int(phone_number))
+        promouter = await api_methods.get_promouter(user_id)
+        name = promouter['data'][0]['full_name']
 
         builder = InlineKeyboardBuilder()
         builder.button(text='Подтвердить', callback_data=f'allow{message.from_user.id}')
         builder.button(text='Отказать', callback_data=f'decline{message.from_user.id}')
         markup = builder.as_markup()
-
         await bot.send_message(chat_id=config.ADMIN_ID,
-                               text=f'Подтвердить регистрацию представителя? \n\nИмя: {message.from_user.full_name}'
+                               text=f'Подтвердить регистрацию представителя? \n\nИмя: {name}'
                                     f'\nUsername: {usname}'
                                     f'\nНомер телефона: +{int(phone_number)}',
                                reply_markup=markup)
-
         await message.answer(f'Спасибо! Скоро админ проверит вашу заявку', reply_markup=ReplyKeyboardRemove())
-
     else:
         button_phone = [KeyboardButton(text="Отправить номер", request_contact=True)]
         keyboard = ReplyKeyboardMarkup(keyboard=[button_phone], row_width=1, resize_keyboard=True)
@@ -91,34 +88,33 @@ async def waiting_for_admin_accept(message: Message, state: FSMContext):
 async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
     ans = call.data
     user_id = ans[5:]
-
     if ans[:5] == 'allow':
         promouter = await api_methods.get_promouter(user_id)
         name = promouter['data'][0]['full_name']
-
         await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         await bot.send_message(chat_id=call.message.chat.id, text=f'Вы подтвердили заявку представителя {name}!')
-
-        await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!')
-        await state.set_state(PromouterStates.main_accepted_promouter_panel)
-        markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
-                                                       "Оформить возврат",
-                                                       "Посмотреть количество билетов в наличии")
-
-        await bot.send_message(chat_id=user_id,
-                               text=f'Добро пожаловать в панель представителя',
-                               reply_markup=markup)
+        markup = chat_backends.create_keyboard_buttons("Войти в панель представителя")
+        await bot.send_message(chat_id=user_id, text='Админ подтвердил вашу заявку!', reply_markup=markup)
     else:
         await bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
         await bot.send_message(chat_id=call.message.chat.id, text='Вы отказали в заявке представителю!')
-        await bot.send_message(chat_id=ans[7:], text='Админ отказал вам в заявке!')
+        markup = create_keyboard_buttons('Зарегистрироваться заново')
+        await bot.send_message(chat_id=ans[7:], text='Админ отказал вам в заявке!', reply_markup=markup)
         await api_methods.delete_promouter(ans[7:])
-        await state.set_state(PromouterStates.begin_registration)
-        markup = create_keyboard_buttons('Зарегистрироваться')
-        await bot.send_message(chat_id=ans[7:],
-                               text=f'Добро пожаловать в телеграм бот агентства Гамма! '
-                               f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
-                               reply_markup=markup)
+
+
+@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Войти в панель представителя')
+async def enter_cabinet(message: Message, state: FSMContext):
+    markup = create_keyboard_buttons('Зарегистрироваться')
+    await state.set_state(PromouterStates.begin_registration)
+    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
+                         f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
+                         reply_markup=markup)
+
+
+@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Зарегистрироваться заново')
+async def enter_cabinet(message: Message, state: FSMContext):
+    await accepted_promouter_panel(message, state)
 
 
 async def accepted_promouter_panel(message: Message, state: FSMContext):

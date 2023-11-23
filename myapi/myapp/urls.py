@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import EventAPIView#, ExportTicketsView
+from .views import EventAPIView
 
 urlpatterns = [
     path('get_promouter/<int:user_id>/', views.PromouterView.as_view(), name='get_promouter'),

@@ -30,7 +30,7 @@ class Ticket(models.Model):
     ticket_holder_surname = models.CharField(max_length=255)
     ticket_holder_sex = models.CharField(null=True)
     ticket_type = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=TICKET_TYPE_CHOICES,
         default=REGULAR,
     )

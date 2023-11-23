@@ -53,9 +53,15 @@ async def enter_personal_data_of_participant(message: Message, state: FSMContext
     data = await state.get_data()
     await state.update_data(participant_event=participant_event)
     await state.set_state(PromouterStates.enter_personal_data_of_participant)
+    buttons = chat_backends.create_keyboard_buttons('Назад')
     await message.answer(text='Введите данные участника в формате:\n\n'
                               'Имя Фамилия \nНомер телефона\nДата рождения в формате ДД.ММ.ГГГГ'
-                              '\nКурс (цифрой)', reply_markup=ReplyKeyboardRemove())
+                              '\nКурс (цифрой)', reply_markup=buttons)
+
+
+@dp.message(PromouterStates.enter_personal_data_of_participant, F.text == 'Назад')
+async def enter_sex_of_participant(message: Message, state: FSMContext):
+    await choose_event_for_participants_registration(message, state)
 
 
 def check_participant_data(name, surname, phone_number, birth_date, course):
@@ -90,7 +96,7 @@ async def enter_sex_of_participant(message: Message, state: FSMContext):
     data = await state.get_data()
     data_blocks = participant_data.split('\n')
     if message.text != "Назад" and message.text != "Ввести данные участника заново":
-        if len(data_blocks) != 4:
+        if len(data_blocks) != 4 or len(data_blocks[0].split()) != 2:
             await message.answer('Кажется, вы ввели данные об участнике в неверном формате! '
                                  'Обратите внимание на форму выше!')
             return
@@ -178,7 +184,8 @@ async def enter_ticket_type(message: Message, state: FSMContext):
 
     markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
     await message.answer(
-        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось {nm_deposit})',
+        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+             f' {nm_deposit})',
         reply_markup=markup)
     await state.set_state(PromouterStates.enter_ticket_type)
 
@@ -203,8 +210,8 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Прайм' and nm_prime == 0) or (ticket_type == 'Обычный' and nm_usual == 0) or (
-            ticket_type == 'Депозит' and nm_deposit == 0):
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0):
         markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
                                                        f'Депозит ({nm_deposit})', 'Назад')
         await message.answer(
@@ -267,6 +274,7 @@ async def confirm_participant(message: Message, state: FSMContext):
                               f'Цена билета: {participant_ticket_price}', reply_markup=markup)
     await state.set_state(PromouterStates.confirm_participant)
 
+
 # TODO: Что делать с дизайном билетов?
 async def create_image(text):
     with open('/usr/src/telegram_bot/handlers/promouter_panel/assets/ticket.jpg', 'rb') as file:
@@ -302,8 +310,8 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_usual_before_change = count_of_ticket_to_check['data'][0]['nm_usual']
     nm_deposit_before_change = count_of_ticket_to_check['data'][0]['nm_deposit']
 
-    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' if data[
-                                                                                  'ticket_type'] == 'Прайм' else 'nm_deposit'
+    field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' \
+        if data['ticket_type'] == 'Прайм' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
 
     count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
@@ -317,7 +325,8 @@ async def registration_ends(message: Message, state: FSMContext):
             (nm_usual_to_check == 0 and nm_usual_before_change != nm_usual_to_check) or \
             (nm_deposit_to_check == 0 and nm_deposit_before_change != nm_deposit_to_check):
         await bot.send_message(chat_id=config.ADMIN_ID,
-                               text=f'Возможно, вы хотите довыпустить билеты для мероприятия «{data["participant_event"]}»\n\n'
+                               text=f'Возможно, вы хотите довыпустить билеты для мероприятия '
+                                    f'«{data["participant_event"]}»\n\n'
                                     f'На данный момент в наличии:\n'
                                     f'Прайм: {nm_prime_to_check}\n'
                                     f'Обычных: {nm_usual_to_check}\n'

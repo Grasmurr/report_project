@@ -7,12 +7,11 @@ from telegram_bot.helpers import chat_backends
 from aiogram import F
 from aiogram.fsm.context import FSMContext
 from telegram_bot.states import AdminStates
-
 from telegram_bot.repository import api_methods
-
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
+from telegram_bot.assets.configs import config
 
-ADMIN_ID = 305378717
+ADMIN_ID = config.ADMIN_ID
 
 
 @dp.message(AdminStates.main, F.text == 'Рассылка')
@@ -55,11 +54,9 @@ async def back_to_start_mailing(message: Message, state: FSMContext):
     await start_mailing(message, state)
 
 
-
 @dp.message(AdminStates.mailing_with_text, F.text == 'Назад')
 async def back_to_start_mailing(message: Message, state: FSMContext):
     await start_mailing(message, state)
-
 
 
 @dp.message(AdminStates.mailing_with_file, F.text == 'Назад')

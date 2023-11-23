@@ -24,7 +24,7 @@ import re
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Оформить возврат")
 async def choose_event_for_refund(message: Message, state: FSMContext):
     events = await get_all_events()
-    event_names = [event['name'] for event in events['data']]
+    event_names = [event['name'] for event in events['data'] if event['is_hidden'] is False]
     markup = chat_backends.create_keyboard_buttons(*event_names, 'Назад')
     await state.set_state(PromouterStates.choose_event_for_participants_refund)
     await message.answer(text='Выберите мероприятие, на которое был куплен билет',
@@ -238,9 +238,6 @@ async def handle_refund_from_promouter(call: CallbackQuery, state: FSMContext):
                                                          f'{ticket_number_match} '
                                                          f'сумму {refund_amount_match}р.!')
     await bot.send_message(chat_id=promouter_id, text='Спасибо! Сообщение было отправлено админу!')
-
-
-
 
 
 #             markup = chat_backends.create_keyboard_buttons("Зарегистрировать участника",
