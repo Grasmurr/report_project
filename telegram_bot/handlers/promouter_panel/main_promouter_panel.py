@@ -107,9 +107,10 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
 async def enter_cabinet(message: Message, state: FSMContext):
     markup = create_keyboard_buttons('Зарегистрироваться')
     await state.set_state(PromouterStates.begin_registration)
-    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
-                         f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
-                         reply_markup=markup)
+    await accepted_promouter_panel (message, state)
+    # await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
+    #                      f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
+    #                      reply_markup=markup)
 
 
 @dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Зарегистрироваться заново')

@@ -12,7 +12,7 @@ from aiogram.types.input_file import BufferedInputFile
 
 from telegram_bot.states import PromouterStates
 from telegram_bot.handlers.promouter_panel.main_promouter_panel import accepted_promouter_panel
-from telegram_bot.repository.api_methods import get_all_events
+from telegram_bot.repository.api_methods import get_all_events, get_promouter
 from telegram_bot.repository import api_methods
 
 from telegram_bot.assets.configs import config
@@ -334,7 +334,12 @@ async def registration_ends(message: Message, state: FSMContext):
                                     f'Для дополнительной эмиссии билетов перейдите в раздел '
                                     f'«Управление мероприятиями» → «Добавить билеты»')
 
-    print(f'выводим дату:{data}')
+    user_id = message.from_user.id
+    print (user_id)
+
+    promouter = await api_methods.get_promouter(user_id)
+    name = promouter['data'][0]['full_name']
+
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
                                     name=data['participant_name'],
@@ -345,7 +350,8 @@ async def registration_ends(message: Message, state: FSMContext):
                                     price=data['participant_ticket_price'],
                                     educational_program=data['participant_ep'],
                                     educational_course=data['participant_course'],
-                                    phone_number=data['participant_phone_number']
+                                    phone_number=data['participant_phone_number'],
+                                    promouter_name=name
                                     )
 
     await message.answer(text='Спасибо! Участник зарегистрирован')

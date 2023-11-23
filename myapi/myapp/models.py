@@ -40,6 +40,7 @@ class Ticket(models.Model):
     educational_course = models.IntegerField(null=True)
     phone_number = models.BigIntegerField(null=True, default='99999999')
     is_refunded = models.BooleanField(default=False)
+    promouter_name = models.CharField(max_length=255, null=True)
 
 
 class Promouter(models.Model):
