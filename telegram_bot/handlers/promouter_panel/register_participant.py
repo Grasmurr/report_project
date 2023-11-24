@@ -201,6 +201,8 @@ async def confirm_participant(message: Message, state: FSMContext):
     if ticket_type != 'Обычный' and ticket_type != 'Прайм' and ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
+
+
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
     print(data)
@@ -242,6 +244,21 @@ async def confirm_participant(message: Message, state: FSMContext):
     event_data = await api_methods.get_event_by_name(event)
     prices = event_data['data'][0]["prices"]
     prices = [str(num) for num in prices]
+
+    ticket_type = data['ticket_type']
+    nm_prime = event_data['data'][0]['nm_prime']
+    nm_usual = event_data['data'][0]['nm_usual']
+    nm_deposit = event_data['data'][0]['nm_deposit']
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
+                                                       f'Депозит ({nm_deposit})', 'Назад')
+        await message.answer(
+            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
+            reply_markup=markup)
+        await state.set_state(PromouterStates.enter_ticket_type)
+        return
+
     if message.text not in prices:
         await message.answer(text="Пожалуйста, выберите цену из предложенных на кнопках")
         return
@@ -293,6 +310,24 @@ async def create_image(text):
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    ticket_type = data['ticket_type']
+    event = data['participant_event']
+    event_data = await api_methods.get_event_by_name(event)
+    nm_prime = event_data['data'][0]['nm_prime']
+    nm_usual = event_data['data'][0]['nm_usual']
+    nm_deposit = event_data['data'][0]['nm_deposit']
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
+                                                       f'Депозит ({nm_deposit})', 'Назад')
+        await message.answer(
+            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
+            reply_markup=markup)
+        await state.set_state(PromouterStates.enter_ticket_type)
+        return
+
     data = await state.get_data()
 
     num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
