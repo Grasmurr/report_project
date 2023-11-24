@@ -104,7 +104,6 @@ class EventCreateOrUpdateView(View):
         return JsonResponse({'status': 'ok'}, status=status_code)
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketView(View):
     def post(self, request):

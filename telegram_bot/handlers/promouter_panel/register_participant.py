@@ -208,14 +208,13 @@ async def confirm_participant(message: Message, state: FSMContext):
     print(data)
     event = data['participant_event']
     event_data = await api_methods.get_event_by_name(event)
-
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
     if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
-                                                       f'Депозит ({nm_deposit})', 'Назад')
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+                                                       f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
             reply_markup=markup)
@@ -320,8 +319,8 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_deposit = event_data['data'][0]['nm_deposit']
     if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
-                                                       f'Депозит ({nm_deposit})', 'Назад')
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+                                                       f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
             reply_markup=markup)
@@ -370,7 +369,7 @@ async def registration_ends(message: Message, state: FSMContext):
                                     f'«Управление мероприятиями» → «Добавить билеты»')
 
     user_id = message.from_user.id
-    print (user_id)
+    print(user_id)
 
     promouter = await api_methods.get_promouter(user_id)
     name = promouter['data'][0]['full_name']
