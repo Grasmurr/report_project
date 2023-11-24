@@ -103,17 +103,17 @@ async def handle_admin_decision(call: CallbackQuery, state: FSMContext):
         await api_methods.delete_promouter(ans[7:])
 
 
-@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Войти в панель представителя')
+@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Зарегистрироваться заново')
 async def enter_cabinet(message: Message, state: FSMContext):
     markup = create_keyboard_buttons('Зарегистрироваться')
     await state.set_state(PromouterStates.begin_registration)
     await accepted_promouter_panel (message, state)
-    # await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
-    #                      f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
-    #                      reply_markup=markup)
+    await message.answer(f'Добро пожаловать в телеграм бот агентства Гамма! '
+                         f'Для начала работы необходимо зарегистрироваться в качестве представителя!',
+                         reply_markup=markup)
 
 
-@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Зарегистрироваться заново')
+@dp.message(PromouterStates.accepted_promouter_panel, F.text == 'Войти в панель представителя')
 async def enter_cabinet(message: Message, state: FSMContext):
     await accepted_promouter_panel(message, state)
 
