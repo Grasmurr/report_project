@@ -202,7 +202,6 @@ async def confirm_participant(message: Message, state: FSMContext):
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
 
-
     await state.update_data(ticket_type=ticket_type)
     data = await state.get_data()
     print(data)
@@ -216,7 +215,9 @@ async def confirm_participant(message: Message, state: FSMContext):
         markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
                                                        f'Депозит', 'Назад')
         await message.answer(
-            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
+            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+             f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -250,10 +251,12 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_deposit = event_data['data'][0]['nm_deposit']
     if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный ({nm_usual})', f'Прайм ({nm_prime})',
-                                                       f'Депозит ({nm_deposit})', 'Назад')
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+                                                       f'Депозит', 'Назад')
         await message.answer(
-            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
+            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+             f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -309,7 +312,6 @@ async def create_image(text):
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
 async def registration_ends(message: Message, state: FSMContext):
-
     data = await state.get_data()
     ticket_type = data['ticket_type']
     event = data['participant_event']
@@ -322,7 +324,9 @@ async def registration_ends(message: Message, state: FSMContext):
         markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
                                                        f'Депозит', 'Назад')
         await message.answer(
-            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n',
+            text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+             f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
