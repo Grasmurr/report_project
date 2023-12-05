@@ -360,9 +360,11 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_usual_to_check = count_of_ticket_to_check['data'][0]['nm_usual']
     nm_deposit_to_check = count_of_ticket_to_check['data'][0]['nm_deposit']
 
-    if (nm_prime_to_check == 0 and nm_prime_to_check != nm_prime_before_change) or \
-            (nm_usual_to_check == 0 and nm_usual_before_change != nm_usual_to_check) or \
-            (nm_deposit_to_check == 0 and nm_deposit_before_change != nm_deposit_to_check):
+    user_id = message.from_user.id
+
+    if (nm_prime_to_check <= 0 and nm_prime_to_check != nm_prime_before_change) or \
+            (nm_usual_to_check <= 0 and nm_usual_before_change != nm_usual_to_check) or \
+            (nm_deposit_to_check <= 0 and nm_deposit_before_change != nm_deposit_to_check):
         await bot.send_message(chat_id=config.ADMIN_ID,
                                text=f'Возможно, вы хотите довыпустить билеты для мероприятия '
                                     f'«{data["participant_event"]}»\n\n'
@@ -373,7 +375,6 @@ async def registration_ends(message: Message, state: FSMContext):
                                     f'Для дополнительной эмиссии билетов перейдите в раздел '
                                     f'«Управление мероприятиями» → «Добавить билеты»')
 
-    user_id = message.from_user.id
     print(user_id)
 
     promouter = await api_methods.get_promouter(user_id)
@@ -390,8 +391,7 @@ async def registration_ends(message: Message, state: FSMContext):
                                     educational_program=data['participant_ep'],
                                     educational_course=data['participant_course'],
                                     phone_number=data['participant_phone_number'],
-                                    promouter_name=name
-                                    )
+                                    promouter_name=name)
 
     await message.answer(text='Спасибо! Участник зарегистрирован')
     await accepted_promouter_panel(message, state)
