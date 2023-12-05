@@ -44,7 +44,7 @@ async def create_promouter(user_id, username, full_name, phone_number):
     return await send_to_api(endpoint, data)
 
 
-async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual, event_date, prices, ticket_path):
+async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual, event_date, prices, ticket_path, photo_id):
     endpoint = 'event/'
     data = {
         'name': name,
@@ -54,7 +54,8 @@ async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual
         'nm_deposit': nm_deposit,
         'date_of_event': event_date,
         'prices': prices,
-        'ticket_path': ticket_path
+        'ticket_path': ticket_path,
+        'photo_id': photo_id
     }
     return await send_to_api(endpoint, data)
 

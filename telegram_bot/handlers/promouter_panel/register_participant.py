@@ -72,7 +72,6 @@ def check_participant_data(name, surname, phone_number, birth_date, course):
     if not surname.isalpha():
         return False
 
-    phone_number = ''.join([i for i in phone_number if i.isdigit()])
     if not phone_number.isdigit() or len(phone_number) != 11:
         return False
 
@@ -104,7 +103,7 @@ async def enter_sex_of_participant(message: Message, state: FSMContext):
     participant_name = data_blocks[0].split()[0]
     print(participant_name)
     participant_surname = data_blocks[0].split()[1]
-    participant_number = data_blocks[1]
+    participant_number = ''.join([i for i in data_blocks[1] if i.isdigit()])
     participant_date_of_birth = data_blocks[2]
     participant_course = data_blocks[3]
     # participant_ticket_price = data_blocks[4]
@@ -309,6 +308,9 @@ async def create_image(text, photo_path):
     temp_file_path = temp_file.name
     temp_file.close()
     return temp_file_path
+
+async def check_if_photo():
+    pass
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")

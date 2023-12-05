@@ -183,6 +183,7 @@ async def add_photo_ticket(message: Message, state: FSMContext):
     await bot.download_file(file_path.file_path, destination=full_path)
 
     await state.update_data(photo_path=full_path)
+    await state.update_data(photo_id=file_id)
     await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
 
     buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
@@ -202,7 +203,8 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
                            nm_deposit=data['nm_deposit'],
                            event_date=data['event_date'],
                            prices=data['prices_range'],
-                           ticket_path=data['photo_path'])
+                           ticket_path=data['photo_path'],
+                           photo_id=data['photo_id'])
         api_methods.create_sheet(data['name'])
 
         await message.answer(text=f'Вы успешно создали мероприятие: {data["name"]}')
