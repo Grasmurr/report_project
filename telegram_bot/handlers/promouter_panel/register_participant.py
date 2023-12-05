@@ -341,7 +341,6 @@ async def registration_ends(message: Message, state: FSMContext):
 
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))
-    os.remove(temp_file_path)
 
     count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
 
