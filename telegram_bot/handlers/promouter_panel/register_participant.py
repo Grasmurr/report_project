@@ -323,7 +323,7 @@ async def check_if_photo(event, ticket_path, photo_id):
         file_path = await bot.get_file(photo_id)
         await bot.download_file(file_path.file_path, destination=full_path)
         await api_methods.update_event_data(name=event,
-                                            ticket_path=file_path,
+                                            ticket_path=full_path,
                                             photo_id=photo_id)
         return
 

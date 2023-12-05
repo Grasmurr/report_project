@@ -39,6 +39,9 @@ class AdminStates(StatesGroup):
     confirm_event_addition_tickets = State()
     confirm_ticket_addition = State()
 
+    enter_event_name_for_ticket_photo = State()
+    catching_new_photo = State()
+
     choose_event_to_change_price_range = State()
     enter_price_range_for_change = State()
     saving_or_editing_from_the_beginning_price_range = State()

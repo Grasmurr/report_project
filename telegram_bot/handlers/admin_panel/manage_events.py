@@ -21,6 +21,7 @@ async def manage_events(message: Message, state: FSMContext):
     markup = chat_backends.create_keyboard_buttons('Создать мероприятие',
                                                    'Добавить билеты',
                                                    'Изменить ценовой диапазон',
+                                                   'Изменить фотографию билета',
                                                    'Скрыть/показать мероприятие',
                                                    'Назад')
     await state.set_state(AdminStates.manage_events)
@@ -161,7 +162,7 @@ async def handle_prices_range(message: Message, state: FSMContext):
                              f'Депозитных: {data["nm_deposit"]}\n\n'
                              f'Номера билетов будут начинаться с {data["ticket_number_start"]}\n\n'
                              f'Дата: {data["event_date"]}\n\n'
-                             f'Ценовой диапазон: {"-".join(str_prices)}\n\nСамое последнее - осталось загрузить фото!'
+                             f'Ценовой диапазон: {"-".join(str_prices)}\n\nСамое последнее - осталось загрузить фото! '
                              f'Пожалуйста, отправьте фото в обычном формате',
                              )
         await state.set_state(AdminStates.add_ticket_photo)

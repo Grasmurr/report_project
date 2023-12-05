@@ -6,3 +6,4 @@ from .mailing import dp, bot
 from .change_ticket_number import dp, bot
 from .price_management import dp, bot
 from .show_events import dp, bot
+from .change_ticket_photo import dp, bot
