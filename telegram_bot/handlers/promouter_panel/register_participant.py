@@ -295,12 +295,13 @@ async def confirm_participant(message: Message, state: FSMContext):
 
 
 # TODO: Что делать с дизайном билетов?
-async def create_image(text):
-    with open('/usr/src/telegram_bot/handlers/promouter_panel/assets/ticket.jpg', 'rb') as file:
+async def create_image(text, photo_path):
+
+    with open(photo_path, 'rb') as file:
         image = Image.open(file).copy()
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("/usr/src/telegram_bot/handlers/promouter_panel/assets/arial.ttf", 200)
-    position = (500, 700)
+    font = ImageFont.truetype("/usr/src/telegram_bot/handlers/promouter_panel/assets/arial.ttf", 100)
+    position = (950, 380)
     color = "black"
     draw.text(position, str(text), color, font=font)
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
@@ -336,7 +337,7 @@ async def registration_ends(message: Message, state: FSMContext):
     num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
                                                           ticket_type=data['ticket_type'])
 
-    temp_file_path = await create_image(num)
+    temp_file_path = await create_image(num, event_data['data'][0]['ticket_path'])
 
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))

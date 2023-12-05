@@ -11,6 +11,7 @@ class Event(models.Model):
     date_of_event = models.DateField(default='2023-11-11')
     prices = ArrayField(models.IntegerField(), null=True)
     is_hidden = models.BooleanField(default=False)
+    ticket_path = models.CharField(null=True, max_length=150)
 
 
 class Ticket(models.Model):

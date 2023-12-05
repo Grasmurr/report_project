@@ -51,6 +51,8 @@ class AdminStates(StatesGroup):
     mailing_with_photo = State()
     mailing_with_file = State()
 
+    add_ticket_photo = State()
+
 
 
 class PromouterStates(StatesGroup):

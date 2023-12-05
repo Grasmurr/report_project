@@ -13,7 +13,7 @@ from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
 from telegram_bot.gdrive import api_methods
 
-import datetime
+import datetime, os
 
 
 @dp.message(AdminStates.main, F.text == 'Управление мероприятиями')
@@ -156,17 +156,37 @@ async def handle_prices_range(message: Message, state: FSMContext):
         await state.update_data(prices_range=rng)
         data = await state.get_data()
         str_prices = [str(i) for i in data["prices_range"]]
-        buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
         await message.answer(f'Хорошо! Вы добавляете мероприятие «{data["name"]}»\n\n'
                              f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\n'
                              f'Депозитных: {data["nm_deposit"]}\n\n'
                              f'Номера билетов будут начинаться с {data["ticket_number_start"]}\n\n'
                              f'Дата: {data["event_date"]}\n\n'
-                             f'Ценовой диапазон: {"-".join(str_prices)}',
-                             reply_markup=buttons)
-        await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+                             f'Ценовой диапазон: {"-".join(str_prices)}\n\nСамое последнее - осталось загрузить фото!'
+                             f'Пожалуйста, отправьте фото в обычном формате',
+                             )
+        await state.set_state(AdminStates.add_ticket_photo)
     except:
         await message.answer('Попробуйте ввести список еще раз')
+
+
+@dp.message(F.photo, AdminStates.add_ticket_photo)
+async def add_photo_ticket(message: Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+
+    save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
+    file_name = f'{current_time}.jpg'
+    full_path = os.path.join(save_path, file_name)
+
+    file_path = await bot.get_file(file_id)
+    await bot.download_file(file_path.file_path, destination=full_path)
+
+    await state.update_data(photo_path=full_path)
+    await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
+
+    buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
+    await message.answer("Фотография успешно загружена!", reply_markup=buttons)
 
 
 @dp.message(AdminStates.saving_or_editing_from_the_beginning)
@@ -181,7 +201,8 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
                            nm_usual=data['nm_usual'],
                            nm_deposit=data['nm_deposit'],
                            event_date=data['event_date'],
-                           prices=data['prices_range'])
+                           prices=data['prices_range'],
+                           ticket_path=data['photo_path'])
         api_methods.create_sheet(data['name'])
 
         await message.answer(text=f'Вы успешно создали мероприятие: {data["name"]}')
