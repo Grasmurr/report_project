@@ -21,6 +21,8 @@ from telegram_bot.gdrive.api_methods import update_gdrive
 
 from PIL import Image, ImageFont, ImageDraw
 
+import datetime, os
+
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
@@ -160,7 +162,7 @@ async def enter_ticket_type(message: Message, state: FSMContext):
                'МИЭМ', 'МИЭФ', 'ПАД', 'ПМИ', 'РиСО', 'Социология',
                'УБ', 'ФГН', 'Философия', 'ФКИ', 'ФКН', 'ФЭН', "Другая ОП",
                'Не ВШЭ']
-    if message.text not in ep_list and message.text != "Изменить тип билета" and  message.text != "Назад":
+    if message.text not in ep_list and message.text != "Изменить тип билета" and message.text != "Назад":
         await message.answer('Кажется вы ввели название образовательной программы с '
                              'клавиатуры. Пожалуйста, используйте кнопки')
         return
@@ -216,7 +218,7 @@ async def confirm_participant(message: Message, state: FSMContext):
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
                  f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
-             f' {nm_deposit})',
+                 f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -255,7 +257,7 @@ async def confirm_participant(message: Message, state: FSMContext):
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
                  f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
-             f' {nm_deposit})',
+                 f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -295,7 +297,6 @@ async def confirm_participant(message: Message, state: FSMContext):
 
 # TODO: Что делать с дизайном билетов?
 async def create_image(text, photo_path):
-
     with open(photo_path, 'rb') as file:
         image = Image.open(file).copy()
     draw = ImageDraw.Draw(image)
@@ -309,8 +310,22 @@ async def create_image(text, photo_path):
     temp_file.close()
     return temp_file_path
 
-async def check_if_photo():
-    pass
+
+async def check_if_photo(event, ticket_path, photo_id):
+    if ticket_path:
+        return
+    else:
+        save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
+        file_name = f'{current_time}.jpg'
+        full_path = os.path.join(save_path, file_name)
+
+        file_path = await bot.get_file(photo_id)
+        await bot.download_file(file_path.file_path, destination=full_path)
+        await api_methods.update_event_data(name=event,
+                                            ticket_path=file_path,
+                                            photo_id=photo_id)
+        return
 
 
 @dp.message(PromouterStates.confirm_participant, F.text == "Подтвердить")
@@ -329,7 +344,7 @@ async def registration_ends(message: Message, state: FSMContext):
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
                  f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
-             f' {nm_deposit})',
+                 f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -339,7 +354,15 @@ async def registration_ends(message: Message, state: FSMContext):
     num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
                                                           ticket_type=data['ticket_type'])
 
-    temp_file_path = await create_image(num, event_data['data'][0]['ticket_path'])
+    ticket_path = check_if_photo(event=event,
+                                 ticket_path=event_data['data'][0]['ticket_path'],
+                                 photo_id=event_data['data'][0]['photo_id'])
+
+    event_data = await api_methods.get_event_by_name(event)
+
+    ticket_path = event_data['data'][0]['ticket_path']
+
+    temp_file_path = await create_image(num, ticket_path)
 
     with open(temp_file_path, 'rb') as file:
         await message.answer_photo(photo=BufferedInputFile(file.read(), filename='file.jpg*'))

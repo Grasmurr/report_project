@@ -182,7 +182,8 @@ async def update_ticket_number(event_name, field, action):
     await send_to_api(endpoint, method='POST')
 
 
-async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None, event_date=None, prices=None):
+async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None,
+                            event_date=None, prices=None, ticket_path=None, photo_id=None):
     endpoint = f'event_prices/{name}/'
     data = {
         'name': name,
@@ -190,7 +191,9 @@ async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None,
         'nm_usual': nm_usual,
         'nm_deposit': nm_deposit,
         'date_of_event': event_date,
-        'prices': prices
+        'prices': prices,
+        'ticket_path': ticket_path,
+        'photo_id': photo_id
     }
     clean_data = {k: v for k, v in data.items() if v is not None}
     return await send_to_api(endpoint, clean_data, method='POST')
