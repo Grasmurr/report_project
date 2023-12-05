@@ -312,7 +312,7 @@ async def create_image(text, photo_path):
 
 
 async def check_if_photo(event, ticket_path, photo_id):
-    if ticket_path:
+    if os.path.isfile(ticket_path):
         return
     else:
         save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
@@ -354,9 +354,9 @@ async def registration_ends(message: Message, state: FSMContext):
     num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
                                                           ticket_type=data['ticket_type'])
 
-    ticket_path = check_if_photo(event=event,
-                                 ticket_path=event_data['data'][0]['ticket_path'],
-                                 photo_id=event_data['data'][0]['photo_id'])
+    await check_if_photo(event=event,
+                         ticket_path=event_data['data'][0]['ticket_path'],
+                         photo_id=event_data['data'][0]['photo_id'])
 
     event_data = await api_methods.get_event_by_name(event)
 
