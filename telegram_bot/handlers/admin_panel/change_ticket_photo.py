@@ -10,7 +10,6 @@ from telegram_bot.states import AdminStates
 
 from telegram_bot.repository.api_methods import create_event, get_all_events
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
-
 from telegram_bot.repository import api_methods
 
 import datetime, os
@@ -39,8 +38,26 @@ async def enter_event_name_for_ticket_photo(message: Message, state: FSMContext)
         return
 
     await state.update_data(event_name=event_name)
-    markup = chat_backends.create_keyboard_buttons('Назад')
-    await message.answer("Пожалуйста, пришлите новую фотографию", reply_markup=markup)
+    markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Прайм', 'Назад')
+    await message.answer("Пожалуйста, выберите тип билета, для которого вы хотите поставить новую фотографию",
+                         reply_markup=markup)
+    await state.set_state(AdminStates.catching_new_photo_type_choice)
+
+
+@dp.message(AdminStates.catching_new_photo_type_choice, F.text == 'Назад')
+async def catching_new_photo_back(message: Message, state: FSMContext):
+    await change_ticket_photo(message, state)
+
+
+@dp.message(AdminStates.catching_new_photo_type_choice)
+async def catching_new_photo_type_choose(message: Message, state: FSMContext):
+    ticket_type = message.text
+    if ticket_type not in ['Обычный', 'Bundle', 'Депозит', 'Прайм']:
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Прайм', 'Назад')
+        await message.answer('Кажется, вы нажали не туда. Пожалуйста, воспользуйтесь кнопками', reply_markup=markup)
+        return
+    await state.update_data(ticket_type=ticket_type)
+    await message.answer(f'Хорошо! Загрузите новую фотографию для билетов типа {ticket_type}')
     await state.set_state(AdminStates.catching_new_photo)
 
 
@@ -59,12 +76,26 @@ async def catching_new_photo(message: Message, state: FSMContext):
 
     data = await state.get_data()
 
-    await api_methods.update_event_data(name=data['event_name'],
-                                        ticket_path=full_path,
-                                        photo_id=file_id)
+    ticket_type = data['ticket_type']
+
+    if ticket_type == 'Обычный':
+        await api_methods.update_event_data(name=data['event_name'],
+                                            ticket_path_usual=full_path,
+                                            photo_id_usual=file_id)
+    elif ticket_type == 'Bundle':
+        await api_methods.update_event_data(name=data['event_name'],
+                                            ticket_path_bundle=full_path,
+                                            photo_id_bundle=file_id)
+    elif ticket_type == 'Депозит':
+        await api_methods.update_event_data(name=data['event_name'],
+                                            ticket_path_deposit=full_path,
+                                            photo_id_deposit=file_id)
+    else:
+        await api_methods.update_event_data(name=data['event_name'],
+                                            ticket_path_prime=full_path,
+                                            photo_id_prime=file_id)
 
     await message.answer("Фотография билета успешно обновлена!")
-
     await state.clear()
     await admin_menu(message, state)
 
@@ -77,6 +108,3 @@ async def back_from_enter_event_name_for_ticket_photo(message: Message, state: F
         await message.answer("Кажется, вы нажали не туда. Возвращаем вас в админ-панель!")
         await state.clear()
         await admin_menu(message, state)
-
-
-

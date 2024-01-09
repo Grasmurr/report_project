@@ -89,8 +89,21 @@ async def create_count_of_normal_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
         count_of_normal_tickets = int(message.text)
         await state.update_data(nm_usual=count_of_normal_tickets)
-        await state.set_state(AdminStates.enter_count_of_event_deposit)
+        await state.set_state(AdminStates.enter_count_of_event_bundle)
         await message.answer(f"Вы создаете {count_of_normal_tickets} обычных билетов. "
+                             f"Теперь введите число bundle билетов, которое вы хотите создать для "
+                             f"этого мероприятия:")
+    else:
+        await message.answer('Попробуйте ввести количество цифрой. Например: 150')
+
+
+@dp.message(AdminStates.enter_count_of_event_bundle)
+async def create_count_of_bundle_tickets(message: Message, state: FSMContext):
+    if message.text.isdigit():
+        count_of_bundle_tickets = int(message.text)
+        await state.update_data(nm_bundle=count_of_bundle_tickets)
+        await state.set_state(AdminStates.enter_count_of_event_deposit)
+        await message.answer(f"Вы создаете {count_of_bundle_tickets} bundle билетов. "
                              f"Теперь введите число депозитных билетов, которое вы хотите создать для "
                              f"этого мероприятия:")
     else:
@@ -158,35 +171,84 @@ async def handle_prices_range(message: Message, state: FSMContext):
         data = await state.get_data()
         str_prices = [str(i) for i in data["prices_range"]]
         await message.answer(f'Хорошо! Вы добавляете мероприятие «{data["name"]}»\n\n'
-                             f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\n'
+                             f'Количество билетов:\nОбычных: {data["nm_usual"]}\nПрайм: {data["nm_prime"]}\nBundle: {data["nm_bundle"]}\n'
                              f'Депозитных: {data["nm_deposit"]}\n\n'
                              f'Номера билетов будут начинаться с {data["ticket_number_start"]}\n\n'
                              f'Дата: {data["event_date"]}\n\n'
-                             f'Ценовой диапазон: {"-".join(str_prices)}\n\nСамое последнее - осталось загрузить фото! '
-                             f'Пожалуйста, отправьте фото в обычном формате',
+                             f'Ценовой диапазон: {"-".join(str_prices)}\n\nТеперь, пожалуйста, загрузите '
+                             f'фото для обычных билетов:',
                              )
-        await state.set_state(AdminStates.add_ticket_photo)
+        await state.set_state(AdminStates.add_ticket_photo_usual)
     except:
         await message.answer('Попробуйте ввести список еще раз')
 
 
-@dp.message(F.photo, AdminStates.add_ticket_photo)
-async def add_photo_ticket(message: Message, state: FSMContext):
+@dp.message(F.photo, AdminStates.add_ticket_photo_usual)
+async def add_photo_ticket_usual(message: Message, state: FSMContext):
     photo = message.photo[-1]
     file_id = photo.file_id
-
     save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
     file_name = f'{current_time}.jpg'
     full_path = os.path.join(save_path, file_name)
-
     file_path = await bot.get_file(file_id)
     await bot.download_file(file_path.file_path, destination=full_path)
+    await state.update_data(photo_path_usual=full_path)
+    await state.update_data(photo_id_usual=file_id)
+    await state.set_state(AdminStates.add_ticket_photo_bundle)
+    await message.answer("Фотография успешно загружена! Теперь, загрузите фото для билетов bundle:")
 
-    await state.update_data(photo_path=full_path)
-    await state.update_data(photo_id=file_id)
+
+
+
+@dp.message(F.photo, AdminStates.add_ticket_photo_bundle)
+async def add_photo_ticket_bundle(message: Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
+    file_name = f'{current_time}.jpg'
+    full_path = os.path.join(save_path, file_name)
+    file_path = await bot.get_file(file_id)
+    await bot.download_file(file_path.file_path, destination=full_path)
+    await state.update_data(photo_path_bundle=full_path)
+    await state.update_data(photo_id_bundle=file_id)
+    await state.set_state(AdminStates.add_ticket_photo_prime)
+    await message.answer("Фотография успешно загружена! Теперь, загрузите фото для билетов prime:")
+
+
+
+@dp.message(F.photo, AdminStates.add_ticket_photo_prime)
+async def add_photo_ticket_bundle(message: Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
+    file_name = f'{current_time}.jpg'
+    full_path = os.path.join(save_path, file_name)
+    file_path = await bot.get_file(file_id)
+    await bot.download_file(file_path.file_path, destination=full_path)
+    await state.update_data(photo_path_prime=full_path)
+    await state.update_data(photo_id_prime=file_id)
+    await state.set_state(AdminStates.add_ticket_photo_deposit)
+    await message.answer("Фотография успешно загружена! Теперь, загрузите фото для билетов deposit:")
+
+
+
+
+@dp.message(F.photo, AdminStates.add_ticket_photo_deposit)
+async def add_photo_ticket_bundle(message: Message, state: FSMContext):
+    photo = message.photo[-1]
+    file_id = photo.file_id
+    save_path = '/usr/src/telegram_bot/handlers/promouter_panel/assets/'
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %I.%M.%S %p")
+    file_name = f'{current_time}.jpg'
+    full_path = os.path.join(save_path, file_name)
+    file_path = await bot.get_file(file_id)
+    await bot.download_file(file_path.file_path, destination=full_path)
+    await state.update_data(photo_path_deposit=full_path)
+    await state.update_data(photo_id_deposit=file_id)
     await state.set_state(AdminStates.saving_or_editing_from_the_beginning)
-
     buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Ввести данные заново')
     await message.answer("Фотография успешно загружена!", reply_markup=buttons)
 
@@ -202,10 +264,18 @@ async def success_notification_and_recreate(message: Message, state: FSMContext)
                            nm_prime=data['nm_prime'],
                            nm_usual=data['nm_usual'],
                            nm_deposit=data['nm_deposit'],
+                           nm_bundle=data['nm_bundle'],
                            event_date=data['event_date'],
                            prices=data['prices_range'],
-                           ticket_path=data['photo_path'],
-                           photo_id=data['photo_id'])
+                           ticket_path_usual=data['photo_path_usual'],
+                           photo_id_usual=data['photo_id_usual'],
+                           ticket_path_bundle=data['photo_path_bundle'],
+                           photo_id_bundle=data['photo_id_bundle'],
+                           ticket_path_prime=data['photo_path_prime'],
+                           photo_id_prime=data['photo_id_prime'],
+                           ticket_path_deposit=data['photo_path_deposit'],
+                           photo_id_deposit=data['photo_id_deposit'],
+                           )
         api_methods.create_sheet(data['name'])
 
         await message.answer(text=f'Вы успешно создали мероприятие: {data["name"]}')

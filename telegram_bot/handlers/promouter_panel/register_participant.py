@@ -182,11 +182,12 @@ async def enter_ticket_type(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
+    nm_bundle = event_data['data'][0]['nm_bundle']
 
-    markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
+    markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Прайм', 'Назад')
     await message.answer(
-        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
-             f' {nm_deposit})',
+        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+             f' {nm_deposit})\nBundle (Осталось {nm_bundle})',
         reply_markup=markup)
     await state.set_state(PromouterStates.enter_ticket_type)
 
@@ -199,7 +200,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
-    if ticket_type != 'Обычный' and ticket_type != 'Bundle' and ticket_type != 'Депозит':
+    if ticket_type != 'Обычный' and ticket_type != 'Прайм' and ticket_type != 'Депозит' and ticket_type != 'Bundle':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
 
@@ -211,14 +212,15 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
-            ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
+    nm_bundle = event_data['data'][0]['nm_bundle']
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0) or (ticket_type == 'Bundle' and nm_bundle <= 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle', 'Прайм',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
-                 f' {nm_deposit})',
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f' {nm_deposit})\nBundle (Осталось {nm_bundle})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -250,14 +252,15 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
-            ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
+    nm_bundle = event_data['data'][0]['nm_bundle']
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0) or (ticket_type == 'Bundle' and nm_bundle <= 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle', 'Прайм',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
-                 f' {nm_deposit})',
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f' {nm_deposit})\nBundle (Осталось {nm_bundle})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -311,7 +314,7 @@ async def create_image(text, photo_path):
     return temp_file_path
 
 
-async def check_if_photo(event, ticket_path, photo_id):
+async def check_if_photo(event, ticket_path, photo_id, ticket_type):
     if os.path.isfile(ticket_path):
         return
     else:
@@ -322,9 +325,22 @@ async def check_if_photo(event, ticket_path, photo_id):
 
         file_path = await bot.get_file(photo_id)
         await bot.download_file(file_path.file_path, destination=full_path)
-        await api_methods.update_event_data(name=event,
-                                            ticket_path=full_path,
-                                            photo_id=photo_id)
+        if ticket_type == 'Bundle':
+            await api_methods.update_event_data(name=event,
+                                                ticket_path_bundle=full_path,
+                                                photo_id_bundle=photo_id)
+        elif ticket_type == 'Обычный':
+            await api_methods.update_event_data(name=event,
+                                                ticket_path_usual=full_path,
+                                                photo_id_usual=photo_id)
+        elif ticket_type == 'Депозит':
+            await api_methods.update_event_data(name=event,
+                                                ticket_path_deposit=full_path,
+                                                photo_id_deposit=photo_id)
+        else:
+            await api_methods.update_event_data(name=event,
+                                                ticket_path_prime=full_path,
+                                                photo_id_prime=photo_id)
         return
 
 
@@ -337,14 +353,15 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
-            ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
+    nm_bundle = event_data['data'][0]['nm_bundle']
+    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+            ticket_type == 'Депозит' and nm_deposit <= 0) or (ticket_type == 'Bundle' and nm_bundle <= 0):
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle', 'Прайм',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
-                 f' {nm_deposit})',
+                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f' {nm_deposit})\nBundle (Осталось {nm_bundle})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
         return
@@ -353,14 +370,30 @@ async def registration_ends(message: Message, state: FSMContext):
 
     num = await chat_backends.generate_next_ticket_number(event_name=data['participant_event'],
                                                           ticket_type=data['ticket_type'])
-
-    await check_if_photo(event=event,
-                         ticket_path=event_data['data'][0]['ticket_path'],
-                         photo_id=event_data['data'][0]['photo_id'])
-
-    event_data = await api_methods.get_event_by_name(event)
-
-    ticket_path = event_data['data'][0]['ticket_path']
+    if ticket_type == 'Bundle':
+        await check_if_photo(event=event,
+                             ticket_path=event_data['data'][0]['ticket_path_bundle'],
+                             photo_id=event_data['data'][0]['photo_id_bundle'],
+                             ticket_type=ticket_type)
+        ticket_path = event_data['data'][0]['ticket_path_bundle']
+    elif ticket_type == 'Обычный':
+        await check_if_photo(event=event,
+                             ticket_path=event_data['data'][0]['ticket_path_usual'],
+                             photo_id=event_data['data'][0]['photo_id_usual'],
+                             ticket_type=ticket_type)
+        ticket_path = event_data['data'][0]['ticket_path_usual']
+    elif ticket_type == 'Депозит':
+        await check_if_photo(event=event,
+                             ticket_path=event_data['data'][0]['ticket_path_deposit'],
+                             photo_id=event_data['data'][0]['photo_id_deposit'],
+                             ticket_type=ticket_type)
+        ticket_path = event_data['data'][0]['ticket_path_deposit']
+    else:
+        await check_if_photo(event=event,
+                             ticket_path=event_data['data'][0]['ticket_path_prime'],
+                             photo_id=event_data['data'][0]['photo_id_prime'],
+                             ticket_type=ticket_type)
+        ticket_path = event_data['data'][0]['ticket_path_prime']
 
     temp_file_path = await create_image(num, ticket_path)
 
@@ -372,9 +405,10 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_prime_before_change = count_of_ticket_to_check['data'][0]['nm_prime']
     nm_usual_before_change = count_of_ticket_to_check['data'][0]['nm_usual']
     nm_deposit_before_change = count_of_ticket_to_check['data'][0]['nm_deposit']
+    nm_bundle_before_change = count_of_ticket_to_check['data'][0]['nm_bundle']
 
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' \
-        if data['ticket_type'] == 'Bundle' else 'nm_deposit'
+        if data['ticket_type'] == 'Прайм' else 'nm_deposit' if data['ticket_type'] == 'Депозит' else 'nm_bundle'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
 
     count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
@@ -383,18 +417,21 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_prime_to_check = count_of_ticket_to_check['data'][0]['nm_prime']
     nm_usual_to_check = count_of_ticket_to_check['data'][0]['nm_usual']
     nm_deposit_to_check = count_of_ticket_to_check['data'][0]['nm_deposit']
+    nm_bundle_to_check = count_of_ticket_to_check['data'][0]['nm_bundle']
 
     user_id = message.from_user.id
 
     if (nm_prime_to_check <= 0 and nm_prime_to_check != nm_prime_before_change) or \
             (nm_usual_to_check <= 0 and nm_usual_before_change != nm_usual_to_check) or \
-            (nm_deposit_to_check <= 0 and nm_deposit_before_change != nm_deposit_to_check):
+            (nm_deposit_to_check <= 0 and nm_deposit_before_change != nm_deposit_to_check) or \
+            (nm_bundle_to_check <= 0 and nm_bundle_before_change != nm_bundle_to_check):
         await bot.send_message(chat_id=config.ADMIN_ID,
                                text=f'Возможно, вы хотите довыпустить билеты для мероприятия '
                                     f'«{data["participant_event"]}»\n\n'
                                     f'На данный момент в наличии:\n'
-                                    f'Bundle: {nm_prime_to_check}\n'
+                                    f'Прайм: {nm_prime_to_check}\n'
                                     f'Обычных: {nm_usual_to_check}\n'
+                                    f'Bundle: {nm_bundle_to_check}\n'
                                     f'Депозитных: {nm_deposit_to_check}\n\n'
                                     f'Для дополнительной эмиссии билетов перейдите в раздел '
                                     f'«Управление мероприятиями» → «Добавить билеты»')

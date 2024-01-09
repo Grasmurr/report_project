@@ -25,6 +25,8 @@ async def generate_next_ticket_number(event_name, ticket_type):
     if not tickets['data']:
         if ticket_type == 'Обычный':
             return start_point
+        elif ticket_type == 'Bundle':
+            return start_point + 1000
         elif ticket_type == 'Прайм':
             return start_point + 10000
         else:
@@ -37,6 +39,12 @@ async def generate_next_ticket_number(event_name, ticket_type):
                 return start_point + 350
             elif mx_num == start_point + 700:
                 return start_point + 800
+            return mx_num + 1
+        elif ticket_type == 'Bundle':
+            if mx_num == start_point + 1200:
+                return start_point + 1350
+            elif mx_num == start_point + 1700:
+                return start_point + 1800
             return mx_num + 1
         elif ticket_type == 'Прайм':
             if mx_num == start_point + 10200:

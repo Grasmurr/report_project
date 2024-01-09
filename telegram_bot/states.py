@@ -15,6 +15,7 @@ class AdminStates(StatesGroup):
     enter_event_date = State()
     enter_count_of_event_normal = State()
     enter_count_of_event_deposit = State()
+    enter_count_of_event_bundle = State()
     enter_prices_range = State()
     continue_to_prices_range = State()
     saving_or_editing_from_the_beginning = State()
@@ -36,10 +37,12 @@ class AdminStates(StatesGroup):
     enter_count_of_event_normal_for_addition = State()
     enter_count_of_event_prime_for_addition = State()
     enter_count_of_event_deposit_for_addition = State()
+    enter_count_of_event_bundle_for_addition = State()
     confirm_event_addition_tickets = State()
     confirm_ticket_addition = State()
 
     enter_event_name_for_ticket_photo = State()
+    catching_new_photo_type_choice = State()
     catching_new_photo = State()
 
     choose_event_to_change_price_range = State()
@@ -54,7 +57,10 @@ class AdminStates(StatesGroup):
     mailing_with_photo = State()
     mailing_with_file = State()
 
-    add_ticket_photo = State()
+    add_ticket_photo_usual = State()
+    add_ticket_photo_bundle = State()
+    add_ticket_photo_prime = State()
+    add_ticket_photo_deposit = State()
 
 
 

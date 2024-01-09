@@ -17,7 +17,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types.input_file import BufferedInputFile
 from telegram_bot.states import AdminStates
 
-
 from telegram_bot.handlers.admin_panel.main_admin_menu import admin_menu
 
 from telegram_bot.gdrive.api_methods import update_gdrive
@@ -47,7 +46,7 @@ async def ticket_refund_choose_type(message: Message, state: FSMContext):
     if exists:
         await state.update_data(event_to_refund=event_to_refund)
         await state.set_state(AdminStates.enter_ticket_type_to_refund)
-        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Прайм', 'Назад')
         await message.answer(text='Выберите тип билета, который вы хотите вернуть:', reply_markup=markup)
     else:
         events = await api_methods.get_all_events()
@@ -65,13 +64,13 @@ async def ticket_type_choose_event_back(message: Message, state: FSMContext):
 @dp.message(AdminStates.enter_ticket_type_to_refund)
 async def ticket_refund_choose_event(message: Message, state: FSMContext):
     type_to_refund = message.text
-    if type_to_refund in ['Обычный', 'Bundle', 'Депозит']:
+    if type_to_refund in ['Обычный', 'Bundle', 'Депозит', 'Прайм']:
         await state.update_data(type_to_refund=type_to_refund)
         await state.set_state(AdminStates.enter_ticket_number)
         await message.answer(text='Пожалуйста, введите номер билета, который вы хотите вернуть:',
                              reply_markup=ReplyKeyboardRemove())
     else:
-        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Прайм', 'Назад')
         await message.answer(text='Кажется, вы случайно нажали не на ту кнопку. Выберите тип билета из списка кнопок:',
                              reply_markup=markup)
 
@@ -127,15 +126,14 @@ async def handle_ticket_number(message: Message, state: FSMContext):
 async def final_the_refund(message: Message, state: FSMContext):
     data = await state.get_data()
     id_data = await api_methods.get_ticket_by_number_or_type(event=data['event_to_refund'],
-                                                            ticket_number=data['number_to_refund'],
-                                                            ticket_type=data['type_to_refund'])
-
+                                                             ticket_number=data['number_to_refund'],
+                                                             ticket_type=data['type_to_refund'])
     new_sum = id_data["data"][0]["price"] - data['return_sum']
-
     await api_methods.return_ticket(ticket_number=data['number_to_refund'],
                                     event=data['event_to_refund'],
                                     ticket_type=data['type_to_refund'], new_price=new_sum)
-    field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Bundle' else 'nm_deposit'
+    field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Прайм' \
+        else 'nm_deposit' if data['type_to_refund'] == 'Депозит' else 'nm_bundle'
     await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
     await message.answer('Возврат произошел успешно!')
 
@@ -144,6 +142,3 @@ async def final_the_refund(message: Message, state: FSMContext):
     await update_gdrive(data['event_to_refund'], ticket_info)
 
     await admin_menu(message, state)
-
-
-

@@ -7,29 +7,37 @@ def now_without_microseconds():
     return timezone.now().replace(microsecond=0)
 
 
-
 class Event(models.Model):
     name = models.CharField(max_length=255, unique=True)
     ticket_number_start = models.IntegerField(null=False, default=100)
     nm_prime = models.IntegerField(null=False)
     nm_usual = models.IntegerField(null=False)
     nm_deposit = models.IntegerField(null=False, default=0)
+    nm_bundle = models.IntegerField(null=False, default=0)
     date_of_event = models.DateField(default='2023-11-11')
     prices = ArrayField(models.IntegerField(), null=True)
     is_hidden = models.BooleanField(default=False)
-    ticket_path = models.CharField(null=True, max_length=150)
-    photo_id = models.CharField(null=True, max_length=150)
+    ticket_path_usual = models.CharField(null=True, max_length=150)
+    photo_id_usual = models.CharField(null=True, max_length=150)
+    ticket_path_bundle = models.CharField(null=True, max_length=150)
+    photo_id_bundle = models.CharField(null=True, max_length=150)
+    ticket_path_prime = models.CharField(null=True, max_length=150)
+    photo_id_prime = models.CharField(null=True, max_length=150)
+    ticket_path_deposit = models.CharField(null=True, max_length=150)
+    photo_id_deposit = models.CharField(null=True, max_length=150)
 
 
 class Ticket(models.Model):
     REGULAR = 'regular'
     PRIME = 'prime'
     DEPOSIT = 'deposit'
+    BUNDLE = 'bundle'
 
     TICKET_TYPE_CHOICES = [
         (REGULAR, 'Regular'),
         (PRIME, 'Prime'),
         (DEPOSIT, 'deposit'),
+        (BUNDLE, 'bundle'),
     ]
 
     event = models.CharField(max_length=255)

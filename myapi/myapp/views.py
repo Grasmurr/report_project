@@ -159,6 +159,8 @@ class IncrementView(View):
             event.nm_usual += 1
         elif field == 'nm_deposit':
             event.nm_deposit += 1
+        elif field == 'nm_bundle':
+            event.nm_bundle += 1
         else:
             return JsonResponse({'error': 'Invalid field'}, status=400)
         event.save()
@@ -176,6 +178,8 @@ class DecrementView(View):
             event.nm_usual -= 1
         elif field == 'nm_deposit':
             event.nm_deposit -= 1
+        elif field == 'nm_bundle':
+            event.nm_bundle -= 1
         else:
             return JsonResponse({'error': 'Invalid field'}, status=400)
         event.save()

@@ -38,7 +38,7 @@ async def enter_event_name_for_addition(message: Message, state: FSMContext):
         return
 
     await state.update_data(event_name=event_name)
-    markup = chat_backends.create_keyboard_buttons('Обычные', 'Bundle', 'Депозит', 'Назад')
+    markup = chat_backends.create_keyboard_buttons('Обычные', 'Bundle', 'Депозит', 'Прайм', 'Назад')
     await state.set_state(AdminStates.enter_ticket_type_for_addition)
     await message.answer("Выберите тип билетов для изменения:", reply_markup=markup)
 
@@ -51,16 +51,18 @@ async def enter_ticket_type_for_addition(message: Message, state: FSMContext):
         await message.answer("Выберите действие:")
         return
 
-    if ticket_type not in ['Обычные', 'Bundle', 'Депозит']:
+    if ticket_type not in ['Обычные', 'Bundle', 'Прайм', 'Депозит']:
         await message.answer("Выбран неверный тип билета. Попробуйте снова.")
         return
 
     await state.update_data(ticket_type=ticket_type)
 
-    if ticket_type == 'Bundle':
+    if ticket_type == 'Прайм':
         await state.set_state(AdminStates.enter_count_of_event_prime_for_addition)
     elif ticket_type == 'Обычные':
         await state.set_state(AdminStates.enter_count_of_event_normal_for_addition)
+    elif ticket_type == 'Bundle':
+        await state.set_state(AdminStates.enter_count_of_event_bundle_for_addition)
     else:
         await state.set_state(AdminStates.enter_count_of_event_deposit_for_addition)
 
@@ -82,6 +84,22 @@ async def enter_count_of_prime_tickets(message: Message, state: FSMContext):
         await message.answer('Кажется, вы ввели число в неправильном формате! Попробуйте написать вот так: 150')
 
 
+@dp.message(AdminStates.enter_count_of_event_bundle_for_addition)
+async def enter_count_of_normal_tickets(message: Message, state: FSMContext):
+    if message.text.isdigit():
+        count = int(message.text)
+        await state.update_data(nm_bundle=count)
+        data = await state.get_data()
+        buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Начать заново')
+        await message.answer(f'Хорошо! Вы хотите установить количество {count} bundle билетов для мероприятия '
+                             f'{data["event_name"]}.'
+                             f'\n\nПродолжить?', reply_markup=buttons)
+        await state.set_state(AdminStates.confirm_event_addition_tickets)
+    else:
+        await message.answer('Кажется, вы ввели число в неправильном формате! Попробуйте написать вот так: 150')
+
+
+
 @dp.message(AdminStates.enter_count_of_event_prime_for_addition)
 async def enter_count_of_normal_tickets(message: Message, state: FSMContext):
     if message.text.isdigit():
@@ -89,7 +107,7 @@ async def enter_count_of_normal_tickets(message: Message, state: FSMContext):
         await state.update_data(nm_prime=count)
         data = await state.get_data()
         buttons = chat_backends.create_keyboard_buttons('Продолжить', 'Начать заново')
-        await message.answer(f'Хорошо! Вы хотите установить количество {count} bundle билетов для мероприятия '
+        await message.answer(f'Хорошо! Вы хотите установить количество {count} прайм билетов для мероприятия '
                              f'{data["event_name"]}.'
                              f'\n\nПродолжить?', reply_markup=buttons)
         await state.set_state(AdminStates.confirm_event_addition_tickets)
@@ -125,8 +143,12 @@ async def confirm_event_name(message: Message, state: FSMContext):
             type = 'депозитных'
             count = event_data['nm_deposit']
             await api_methods.update_event_data(name=event_data['event_name'], nm_deposit=count)
-        else:
+        elif "nm_bundle" in event_data:
             type = 'bundle'
+            count = event_data['nm_bundle']
+            await api_methods.update_event_data(name=event_data['event_name'], nm_bundle=count)
+        else:
+            type = 'прайм'
             count = event_data['nm_prime']
             await api_methods.update_event_data(name=event_data['event_name'], nm_prime=count)
 

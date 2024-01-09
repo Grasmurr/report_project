@@ -44,7 +44,9 @@ async def create_promouter(user_id, username, full_name, phone_number):
     return await send_to_api(endpoint, data)
 
 
-async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual, event_date, prices, ticket_path, photo_id):
+async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual, nm_bundle, event_date, prices,
+                       ticket_path_usual, photo_id_usual, ticket_path_bundle, photo_id_bundle,
+                       ticket_path_prime, photo_id_prime, ticket_path_deposit, photo_id_deposit):
     endpoint = 'event/'
     data = {
         'name': name,
@@ -52,10 +54,17 @@ async def create_event(name, ticket_number_start, nm_prime, nm_deposit, nm_usual
         'nm_prime': nm_prime,
         'nm_usual': nm_usual,
         'nm_deposit': nm_deposit,
+        'nm_bundle': nm_bundle,
         'date_of_event': event_date,
         'prices': prices,
-        'ticket_path': ticket_path,
-        'photo_id': photo_id
+        'ticket_path_usual': ticket_path_usual,
+        'photo_id_usual': photo_id_usual,
+        'ticket_path_bundle': ticket_path_bundle,
+        'photo_id_bundle': photo_id_bundle,
+        'ticket_path_prime': ticket_path_prime,
+        'photo_id_prime': photo_id_prime,
+        'ticket_path_deposit': ticket_path_deposit,
+        'photo_id_deposit': photo_id_deposit
     }
     return await send_to_api(endpoint, data)
 
@@ -182,21 +191,31 @@ async def update_ticket_number(event_name, field, action):
     await send_to_api(endpoint, method='POST')
 
 
-async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None,
-                            event_date=None, prices=None, ticket_path=None, photo_id=None):
+async def update_event_data(name, nm_prime=None, nm_usual=None, nm_deposit=None, nm_bundle=None, event_date=None,
+                            prices=None, ticket_path_usual=None, photo_id_usual=None, ticket_path_bundle=None,
+                            photo_id_bundle=None, ticket_path_prime=None, photo_id_prime=None,
+                            ticket_path_deposit=None, photo_id_deposit=None):
     endpoint = f'event_prices/{name}/'
     data = {
         'name': name,
         'nm_prime': nm_prime,
         'nm_usual': nm_usual,
         'nm_deposit': nm_deposit,
+        'nm_bundle': nm_bundle,
         'date_of_event': event_date,
         'prices': prices,
-        'ticket_path': ticket_path,
-        'photo_id': photo_id
+        'ticket_path_usual': ticket_path_usual,
+        'photo_id_usual': photo_id_usual,
+        'ticket_path_bundle': ticket_path_bundle,
+        'photo_id_bundle': photo_id_bundle,
+        'ticket_path_prime': ticket_path_prime,
+        'photo_id_prime': photo_id_prime,
+        'ticket_path_deposit': ticket_path_deposit,
+        'photo_id_deposit': photo_id_deposit
     }
     clean_data = {k: v for k, v in data.items() if v is not None}
     return await send_to_api(endpoint, clean_data, method='POST')
+
 
 
 async def update_event_visibility(event_name, is_hidden):
