@@ -47,7 +47,7 @@ async def ticket_refund_choose_type(message: Message, state: FSMContext):
     if exists:
         await state.update_data(event_to_refund=event_to_refund)
         await state.set_state(AdminStates.enter_ticket_type_to_refund)
-        markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
         await message.answer(text='Выберите тип билета, который вы хотите вернуть:', reply_markup=markup)
     else:
         events = await api_methods.get_all_events()
@@ -65,13 +65,13 @@ async def ticket_type_choose_event_back(message: Message, state: FSMContext):
 @dp.message(AdminStates.enter_ticket_type_to_refund)
 async def ticket_refund_choose_event(message: Message, state: FSMContext):
     type_to_refund = message.text
-    if type_to_refund in ['Обычный', 'Прайм', 'Депозит']:
+    if type_to_refund in ['Обычный', 'Bundle', 'Депозит']:
         await state.update_data(type_to_refund=type_to_refund)
         await state.set_state(AdminStates.enter_ticket_number)
         await message.answer(text='Пожалуйста, введите номер билета, который вы хотите вернуть:',
                              reply_markup=ReplyKeyboardRemove())
     else:
-        markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
+        markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
         await message.answer(text='Кажется, вы случайно нажали не на ту кнопку. Выберите тип билета из списка кнопок:',
                              reply_markup=markup)
 
@@ -135,7 +135,7 @@ async def final_the_refund(message: Message, state: FSMContext):
     await api_methods.return_ticket(ticket_number=data['number_to_refund'],
                                     event=data['event_to_refund'],
                                     ticket_type=data['type_to_refund'], new_price=new_sum)
-    field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Прайм' else 'nm_deposit'
+    field = 'nm_usual' if data['type_to_refund'] == 'Обычный' else 'nm_prime' if data['type_to_refund'] == 'Bundle' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['event_to_refund'], action='increment', field=field)
     await message.answer('Возврат произошел успешно!')
 

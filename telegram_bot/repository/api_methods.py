@@ -76,7 +76,7 @@ async def create_ticket(event, ticket_number, name, surname, gender, ticket_type
         'educational_program': educational_program,
         'educational_course': educational_course,
         'phone_number': phone_number,
-        'promouter_name': promouter_name
+        'promouter_name': promouter_name,
     }
     return await send_to_api(endpoint, data)
 

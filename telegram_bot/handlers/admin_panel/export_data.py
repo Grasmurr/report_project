@@ -101,7 +101,8 @@ def create_table(data, event, file_format):
         "educational_course": "Курс",
         "phone_number": "Номер телефона",
         "is_refunded": "Возвращен ли билет?",
-        "promouter_name": "Представитель"
+        "promouter_name": "Представитель",
+        'date': 'Дата'
     }
 
     df = pd.DataFrame.from_records(data)

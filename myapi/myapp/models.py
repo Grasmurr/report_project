@@ -1,5 +1,11 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.utils import timezone
+
+
+def now_without_microseconds():
+    return timezone.now().replace(microsecond=0)
+
 
 
 class Event(models.Model):
@@ -43,6 +49,7 @@ class Ticket(models.Model):
     phone_number = models.BigIntegerField(null=True, default='99999999')
     is_refunded = models.BooleanField(default=False)
     promouter_name = models.CharField(max_length=255, null=True)
+    date = models.DateTimeField(default=now_without_microseconds(), null=True)
 
 
 class Promouter(models.Model):

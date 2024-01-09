@@ -183,9 +183,9 @@ async def enter_ticket_type(message: Message, state: FSMContext):
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
 
-    markup = chat_backends.create_keyboard_buttons('Обычный', 'Прайм', 'Депозит', 'Назад')
+    markup = chat_backends.create_keyboard_buttons('Обычный', 'Bundle', 'Депозит', 'Назад')
     await message.answer(
-        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+        text=f'Выберите тип билета:\n\nОбычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
              f' {nm_deposit})',
         reply_markup=markup)
     await state.set_state(PromouterStates.enter_ticket_type)
@@ -199,7 +199,7 @@ async def back_from_enter_ticket_type(message: Message, state: FSMContext):
 @dp.message(PromouterStates.enter_ticket_type)
 async def confirm_participant(message: Message, state: FSMContext):
     ticket_type = message.text
-    if ticket_type != 'Обычный' and ticket_type != 'Прайм' and ticket_type != 'Депозит':
+    if ticket_type != 'Обычный' and ticket_type != 'Bundle' and ticket_type != 'Депозит':
         await message.answer("Кажется, вы нажали не туда! Пожалуйста используйте "
                              "кнопки ниже чтобы выбрать тип билета")
 
@@ -211,13 +211,13 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
                  f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
@@ -250,13 +250,13 @@ async def confirm_participant(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
                  f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
@@ -337,13 +337,13 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_prime = event_data['data'][0]['nm_prime']
     nm_usual = event_data['data'][0]['nm_usual']
     nm_deposit = event_data['data'][0]['nm_deposit']
-    if (ticket_type == 'Прайм' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
+    if (ticket_type == 'Bundle' and nm_prime <= 0) or (ticket_type == 'Обычный' and nm_usual <= 0) or (
             ticket_type == 'Депозит' and nm_deposit <= 0):
-        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Прайм',
+        markup = chat_backends.create_keyboard_buttons(f'Обычный', f'Bundle',
                                                        f'Депозит', 'Назад')
         await message.answer(
             text=f'Извините, билеты типа {ticket_type} закончились. Пожалуйста, выберите другой тип билета:\n\n'
-                 f'Обычный (Осталось {nm_usual})\nПрайм (Осталось {nm_prime})\nДепозит (Осталось'
+                 f'Обычный (Осталось {nm_usual})\nBundle (Осталось {nm_prime})\nДепозит (Осталось'
                  f' {nm_deposit})',
             reply_markup=markup)
         await state.set_state(PromouterStates.enter_ticket_type)
@@ -374,7 +374,7 @@ async def registration_ends(message: Message, state: FSMContext):
     nm_deposit_before_change = count_of_ticket_to_check['data'][0]['nm_deposit']
 
     field = 'nm_usual' if data['ticket_type'] == 'Обычный' else 'nm_prime' \
-        if data['ticket_type'] == 'Прайм' else 'nm_deposit'
+        if data['ticket_type'] == 'Bundle' else 'nm_deposit'
     await api_methods.update_ticket_number(event_name=data['participant_event'], action='decrement', field=field)
 
     count_of_ticket_to_check = await api_methods.get_event_by_name(data['participant_event'])
@@ -393,7 +393,7 @@ async def registration_ends(message: Message, state: FSMContext):
                                text=f'Возможно, вы хотите довыпустить билеты для мероприятия '
                                     f'«{data["participant_event"]}»\n\n'
                                     f'На данный момент в наличии:\n'
-                                    f'Прайм: {nm_prime_to_check}\n'
+                                    f'Bundle: {nm_prime_to_check}\n'
                                     f'Обычных: {nm_usual_to_check}\n'
                                     f'Депозитных: {nm_deposit_to_check}\n\n'
                                     f'Для дополнительной эмиссии билетов перейдите в раздел '

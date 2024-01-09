@@ -42,7 +42,7 @@ async def sending_information_about_event(message: Message, state: FSMContext):
 
     markup = chat_backends.create_keyboard_buttons("Посмотреть данные о другом мероприятии", "Вернуться в меню")
     await message.answer (text=f"Данные о билетах в наличии для мероприятия «{event}»:\n\n"
-                               f"Прайм: осталось {nm_prime}\n"
+                               f"Bundle: осталось {nm_prime}\n"
                                f"Обычные: осталось {nm_usual}\n"
                                f"Депозитные: осталось {nm_deposit}", reply_markup=markup)
     await state.set_state(PromouterStates.tickets_info_final)
