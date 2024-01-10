@@ -20,8 +20,10 @@ from telegram_bot.assets.configs import config
 from telegram_bot.gdrive.api_methods import update_gdrive
 
 from PIL import Image, ImageFont, ImageDraw
-import datetime, os
-from django.utils import timezone
+import os, datetime
+# from datetime import datetime, timezone
+
+from datetime import timezone
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
@@ -374,24 +376,29 @@ async def registration_ends(message: Message, state: FSMContext):
                              ticket_path=event_data['data'][0]['ticket_path_bundle'],
                              photo_id=event_data['data'][0]['photo_id_bundle'],
                              ticket_type=ticket_type)
+        event_data = await api_methods.get_event_by_name(event)
         ticket_path = event_data['data'][0]['ticket_path_bundle']
     elif ticket_type == 'Обычный':
         await check_if_photo(event=event,
                              ticket_path=event_data['data'][0]['ticket_path_usual'],
                              photo_id=event_data['data'][0]['photo_id_usual'],
                              ticket_type=ticket_type)
+        event_data = await api_methods.get_event_by_name(event)
         ticket_path = event_data['data'][0]['ticket_path_usual']
     elif ticket_type == 'Депозит':
         await check_if_photo(event=event,
                              ticket_path=event_data['data'][0]['ticket_path_deposit'],
                              photo_id=event_data['data'][0]['photo_id_deposit'],
                              ticket_type=ticket_type)
+        event_data = await api_methods.get_event_by_name(event)
         ticket_path = event_data['data'][0]['ticket_path_deposit']
+
     else:
         await check_if_photo(event=event,
                              ticket_path=event_data['data'][0]['ticket_path_prime'],
                              photo_id=event_data['data'][0]['photo_id_prime'],
                              ticket_type=ticket_type)
+        event_data = await api_methods.get_event_by_name(event)
         ticket_path = event_data['data'][0]['ticket_path_prime']
 
     temp_file_path = await create_image(num, ticket_path)
@@ -441,8 +448,6 @@ async def registration_ends(message: Message, state: FSMContext):
     name = promouter['data'][0]['full_name']
 
 
-
-
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
                                     name=data['participant_name'],
@@ -455,7 +460,7 @@ async def registration_ends(message: Message, state: FSMContext):
                                     educational_course=data['participant_course'],
                                     phone_number=data['participant_phone_number'],
                                     promouter_name=name,
-                                    date=timezone.now().replace(microsecond=0))
+                                    date=datetime.datetime.now(timezone.utc).replace(microsecond=0).isoformat())
 
     await message.answer(text='Спасибо! Участник зарегистрирован')
     await accepted_promouter_panel(message, state)
