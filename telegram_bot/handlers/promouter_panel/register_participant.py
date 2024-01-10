@@ -20,9 +20,8 @@ from telegram_bot.assets.configs import config
 from telegram_bot.gdrive.api_methods import update_gdrive
 
 from PIL import Image, ImageFont, ImageDraw
-
 import datetime, os
-
+from django.utils import timezone
 
 @dp.message(PromouterStates.main_accepted_promouter_panel, F.text == "Зарегистрировать участника")
 async def choose_event_for_participants_registration(message: Message, state: FSMContext):
@@ -441,6 +440,9 @@ async def registration_ends(message: Message, state: FSMContext):
     promouter = await api_methods.get_promouter(user_id)
     name = promouter['data'][0]['full_name']
 
+
+
+
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
                                     name=data['participant_name'],
@@ -452,7 +454,8 @@ async def registration_ends(message: Message, state: FSMContext):
                                     educational_program=data['participant_ep'],
                                     educational_course=data['participant_course'],
                                     phone_number=data['participant_phone_number'],
-                                    promouter_name=name)
+                                    promouter_name=name,
+                                    date=timezone.now().replace(microsecond=0))
 
     await message.answer(text='Спасибо! Участник зарегистрирован')
     await accepted_promouter_panel(message, state)
