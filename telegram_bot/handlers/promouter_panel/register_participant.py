@@ -299,7 +299,6 @@ async def confirm_participant(message: Message, state: FSMContext):
     await state.set_state(PromouterStates.confirm_participant)
 
 
-# TODO: Что делать с дизайном билетов?
 async def create_image(text, photo_path):
     with open(photo_path, 'rb') as file:
         image = Image.open(file).copy()
@@ -446,7 +445,6 @@ async def registration_ends(message: Message, state: FSMContext):
 
     promouter = await api_methods.get_promouter(user_id)
     name = promouter['data'][0]['full_name']
-
 
     await api_methods.create_ticket(event=data['participant_event'],
                                     ticket_number=num,
