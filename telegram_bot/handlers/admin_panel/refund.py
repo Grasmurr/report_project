@@ -107,19 +107,14 @@ async def handle_ticket_number(message: Message, state: FSMContext):
         name = id_data['data'][0]['ticket_holder_name']
         surname = id_data['data'][0]['ticket_holder_surname']
 
-        coefficent_to_return = await chat_backends.define_refund_percent(data['event_to_refund'])
-        if coefficent_to_return:
-            return_sum = int(id_data["data"][0]["price"] * coefficent_to_return)
+        return_sum = int(id_data["data"][0]["price"])
 
-            await state.update_data(return_sum=return_sum)
-            await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.\n'
-                                 f'\nИмя: {name}\nФамилия: {surname}\n'
-                                 f'Тип билета: {data["type_to_refund"]}\n\nСумма для возврата: {return_sum}'
-                                 f'\n\nПродолжить?', reply_markup=markup)
-            await state.set_state(AdminStates.approve_ticket_refund)
-        else:
-            await message.answer('До мероприятия осталось менее 3 дней, поэтому возврат невозможен!')
-            await admin_menu(message, state)
+        await state.update_data(return_sum=return_sum)
+        await message.answer(f'Вы хотите вернуть билет №{number_to_refund}.\n'
+                             f'\nИмя: {name}\nФамилия: {surname}\n'
+                             f'Тип билета: {data["type_to_refund"]}\n\nСумма для возврата: {return_sum}'
+                             f'\n\nПродолжить?', reply_markup=markup)
+        await state.set_state(AdminStates.approve_ticket_refund)
 
 
 @dp.message(AdminStates.approve_ticket_refund)
